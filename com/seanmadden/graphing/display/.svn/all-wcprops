@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/graphing/!svn/ver/10/trunk/src/com/seanmadden/graphing/display
+END
+GraphPanel.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/graphing/!svn/ver/8/trunk/src/com/seanmadden/graphing/display/GraphPanel.java
+END
+NodeDebugRenderer.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/graphing/!svn/ver/8/trunk/src/com/seanmadden/graphing/display/NodeDebugRenderer.java
+END
+Renderer.java
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/graphing/!svn/ver/8/trunk/src/com/seanmadden/graphing/display/Renderer.java
+END
