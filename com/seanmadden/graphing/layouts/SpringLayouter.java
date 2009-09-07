@@ -152,7 +152,6 @@ public class SpringLayouter implements Layout, GraphListener {
                 return y;
         }
 
-        @Override
         public void triggerChange(Graph g, Change change) {
                 if (g == lastLayout) {
                         graphChanged = true;

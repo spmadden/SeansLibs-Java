@@ -64,14 +64,12 @@ public class BufferedLayouter implements Layout {
      *
      * @param g the graph we're layouting
      */
-    @Override
     public final void doLayout(final Graph g) {
         for (Layout l : layouts) {
             l.doLayout(g);
         }
     }
 
-    @Override
     public boolean isLayoutable(Graph g) {
         for (Layout l : layouts) {
             if (!l.isLayoutable(g)) { return false; }
