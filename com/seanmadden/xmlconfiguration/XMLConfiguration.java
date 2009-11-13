@@ -32,7 +32,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 public class XMLConfiguration extends DefaultHandler {
 	private String name = "XMLConfiguration";
 	Hashtable<String, String> stringsTable = new Hashtable<String, String>();
-	Hashtable<String, XMLizible> izibleTable = new Hashtable<String, XMLizible>();
 	Hashtable<String, Integer> intsTable = new Hashtable<String, Integer>();
 	Hashtable<String, Boolean> boolsTable = new Hashtable<String, Boolean>();
 
@@ -132,7 +131,17 @@ public class XMLConfiguration extends DefaultHandler {
 	}
 
 	public boolean writeToXMLFile(String filename){
-		
+		FileWriter file;
+		try {
+			file = new FileWriter(new File(filename));
+			file.write(generateXML());
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 	
 	public boolean parseXMLFile(String filename) {
