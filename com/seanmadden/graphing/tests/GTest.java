@@ -44,15 +44,15 @@ public class GTest {
                 try {
                     g.createNode(2);
                     g.createNode(2);
-                    g.createNode(2);
-                    g.createNode(2);
+//                    g.createNode(2);
+//                    g.createNode(2);
                 } catch (NullDataException e) {
                     e.printStackTrace();
                 }
 
                 g.createEdge(0, 1);
-                g.createEdge(2, 3);
-                g.createEdge(2, 1);
+//                g.createEdge(2, 3);
+//                g.createEdge(2, 1);
 
                 
                 final SpringLayouter sl = new SpringLayouter();
