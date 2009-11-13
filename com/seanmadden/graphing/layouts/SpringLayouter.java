@@ -51,7 +51,7 @@ public class SpringLayouter implements Layout, GraphListener {
                         hit.add(src);
                         for (Node dst : nodes) {
                                 if (hit.contains(dst)) continue;
-                                repulsiveForce(src, dst);
+//                                repulsiveForce(src, dst);
                                 // System.out.println(src + "=>" + dst);
                                 // System.out.print("x: " + xForces.get(dst));
                                 // System.out.println(" y: " +
@@ -60,7 +60,7 @@ public class SpringLayouter implements Layout, GraphListener {
                 }
 
                 for (Edge ed : g.getAllEdges()) {
-                        // attractiveForce(ed.getSource(), ed.getDestination());
+                        attractiveForce(ed.getSource(), ed.getDestination());
                 }
                 double fx, fy;
                 for (Node nd : g.getAllNodes()) {
@@ -109,10 +109,10 @@ public class SpringLayouter implements Layout, GraphListener {
 
                 System.out.println("dx: " + dx + " dy:" + dy);
 
-                xForceAdd(a, dx);
-                yForceAdd(a, dy);
-                xForceAdd(b, -dx);
-                yForceAdd(b, -dy);
+                xForceAdd(a, -dx);
+                yForceAdd(a, -dy);
+                xForceAdd(b, .000001);
+                yForceAdd(b, .000001);
 
         }
 
@@ -120,20 +120,23 @@ public class SpringLayouter implements Layout, GraphListener {
                 double dx = a.getPoint().x - b.getPoint().x;
                 double dy = a.getPoint().y - b.getPoint().y;
                 System.out.println();
-
-                final double ratio = (distance(a, b) - idealEdgeLength)
-                                / distance(a, b);
+                double distance = distance(a,b);
+                if(distance == 0 || Double.isNaN(distance)){
+                	distance = .001;
+                }
+                final double ratio = (distance - idealEdgeLength)
+                                / distance;
 
                 dx *= 2 * ratio;
                 dy *= 2 * ratio;
 
-                // System.out.println("dx: " + -dx + " dy: " + -dy);
-                // System.out.println(ratio);
+                 System.out.println("dx: " + -dx + " dy: " + -dy);
+                 System.out.println(ratio);
                 //                
                 xForceAdd(a, dx);
                 yForceAdd(a, dy);
-                xForceAdd(b, -dx);
-                yForceAdd(b, -dy);
+                xForceAdd(b, .00000001);
+                yForceAdd(b, .00000001);
         }
 
         private double xForceAdd(Node a, double x) {
