@@ -30,9 +30,11 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -49,7 +51,7 @@ import javax.swing.JTextField;
  */
 public class XMLEditGui implements ActionListener {
 	private JFrame panel = new JFrame("Edit Configuration");
-	
+
 	/**
 	 * A reference to the XML Configuration object we're editing.
 	 */
@@ -83,6 +85,11 @@ public class XMLEditGui implements ActionListener {
 		this.config = config;
 	}
 
+	/**
+	 * Dynamically generates and displays a gui the user can interface with and
+	 * edit this system.
+	 * 
+	 */
 	protected void displayGUI() {
 		for (Entry<String, XMLDataValue<String>> ent : config.stringsTable
 				.entrySet()) {
@@ -116,6 +123,21 @@ public class XMLEditGui implements ActionListener {
 			components.add(row);
 		}
 
+		for (Entry<String, XMLDataValue<Boolean>> ent : config.boolsTable
+				.entrySet()) {
+			JComboBox comp = new JComboBox(new String[] { "Yes", "No" });
+			comp.setActionCommand(ent.getKey());
+			JLabel label = new JLabel(ent.getValue().getDescription());
+
+			TableRow row = new TableRow();
+			row.edit = comp;
+			row.label = label;
+			row.name = ent.getKey();
+			row.type = "Boolean";
+
+			components.add(row);
+		}
+
 		panel.setLayout(new GridLayout(components.size() + 1, 2));
 		for (TableRow comp : components) {
 			panel.add(comp.label);
@@ -130,7 +152,7 @@ public class XMLEditGui implements ActionListener {
 
 		panel.add(saveButton);
 		panel.add(cancelButton);
-		
+
 		panel.pack();
 		panel.setVisible(true);
 		panel.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -159,17 +181,28 @@ public class XMLEditGui implements ActionListener {
 				if (row.type.equals("Integer")) {
 					JTextField field = (JTextField) row.edit;
 					JLabel label = (JLabel) row.label;
-					config.addValue(row.name, Integer.valueOf(field.getText()),
-							label.getText());
-				}else if(row.type.equals("String")){
+					try {
+						config.addValue(row.name, Integer.valueOf(field
+								.getText()), label.getText());
+					} catch (NumberFormatException ex) {
+						JOptionPane.showMessageDialog(null, field.getText()
+								+ " is not an integer.", "Error",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				} else if (row.type.equals("String")) {
 					JTextField field = (JTextField) row.edit;
 					JLabel label = (JLabel) row.label;
 					config.addValue(row.name, field.getText(), label.getText());
+				} else if(row.type.equals("Boolean")){
+					JComboBox field = (JComboBox) row.edit;
+					JLabel label = (JLabel) row.label;
+					Boolean value = field.getSelectedItem().equals("Yes");
+					config.addValue(row.name, value, label.getText());
 				}
 			}
 			System.out.println(config.generateXML());
 			panel.dispose();
-		}else if(cmd.equals("CancelXML")){
+		} else if (cmd.equals("CancelClose")) {
 			panel.dispose();
 		}
 	}

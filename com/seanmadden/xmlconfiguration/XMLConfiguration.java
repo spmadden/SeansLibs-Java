@@ -209,6 +209,24 @@ public class XMLConfiguration extends DefaultHandler {
 	}
 
 	/**
+	* Updates a value in the current system.
+	* 
+	* @param name The key to retrieve
+	* @param value - The value to set it to.
+	*/
+	public void updateValue(String name, String value) {
+		XMLDataValue<String> val = stringsTable.get(name);
+		if (val == null) {
+			addValue(name, value);
+			return;
+		}
+
+		XMLDataValue<String> newVal = new XMLDataValue<String>(val.getName(),
+				val.getValue(), val.getDescription());
+		stringsTable.put(name, newVal);
+	}
+
+	/**
 	 * Adds a String configuration directive
 	 * 
 	 * @param name
@@ -261,22 +279,44 @@ public class XMLConfiguration extends DefaultHandler {
 	public void addValue(String name, Integer value) {
 		addValue(name, value, null);
 	}
+	
+	/**
+	* Updates the values for an integer.
+	* 
+	* @param name the key to retrieve
+	* @param value the update to push down.
+	*/
+	public void updateValue(String name, Integer value){
+		XMLDataValue<Integer> val = intsTable.get(name);
+		if (val == null) {
+			addValue(name, value);
+			return;
+		}
+
+		XMLDataValue<Integer> newVal = new XMLDataValue<Integer>(val.getName(),
+				val.getValue(), val.getDescription());
+		intsTable.put(name, newVal);
+	}
 
 	/**
-	* Adds a new Integer directive to this object
-	* 
-	* @param name The name of the directive to be referenced by
-	* @param value The value of the directive
-	* @param desc The description of the directive
-	*/
-	public void addValue(String name, Integer value, String desc){
+	 * Adds a new Integer directive to this object
+	 * 
+	 * @param name
+	 *            The name of the directive to be referenced by
+	 * @param value
+	 *            The value of the directive
+	 * @param desc
+	 *            The description of the directive
+	 */
+	public void addValue(String name, Integer value, String desc) {
 		intsTable.put(name, new XMLDataValue<Integer>(name, value, desc));
 	}
-	
+
 	/**
 	 * Retrieves and returns the value of the Integer represented by name
 	 * 
-	 * @param name the name of the directive to retrieve
+	 * @param name
+	 *            the name of the directive to retrieve
 	 * @return the value of the directive, null if non-existent
 	 */
 	public Integer getIntegerValue(String name) {
@@ -312,15 +352,36 @@ public class XMLConfiguration extends DefaultHandler {
 	public void addValue(String name, Boolean value) {
 		addValue(name, value, null);
 	}
+
+	/**
+	* Retrieves and updates the boolean specified by name
+	* 
+	* @param name the key to retrieve
+	* @param value the value to update it to.
+	*/
+	public void updateValue(String name, Boolean value){
+		XMLDataValue<Boolean> val = boolsTable.get(name);
+		if (val == null) {
+			addValue(name, value);
+			return;
+		}
+
+		XMLDataValue<Boolean> newVal = new XMLDataValue<Boolean>(val.getName(),
+				val.getValue(), val.getDescription());
+		boolsTable.put(name, newVal);
+	}
 	
 	/**
-	* Adds a new Boolean directive to this object
-	* 
-	* @param name The name of the directive will be referenced by
-	* @param value The value of the directive
-	* @param desc The description of the directive.
-	*/
-	public void addValue(String name, Boolean value, String desc){
+	 * Adds a new Boolean directive to this object
+	 * 
+	 * @param name
+	 *            The name of the directive will be referenced by
+	 * @param value
+	 *            The value of the directive
+	 * @param desc
+	 *            The description of the directive.
+	 */
+	public void addValue(String name, Boolean value, String desc) {
 		boolsTable.put(name, new XMLDataValue<Boolean>(name, value, desc));
 	}
 
@@ -450,7 +511,7 @@ public class XMLConfiguration extends DefaultHandler {
 	 */
 	public void endElement(String uri, String name, String qName) {
 		String lastPos = position.pop();
-
+		System.out.println(position);
 		if (lastPos.equals("Name")) {
 			dataName = data.trim();
 		} else if (lastPos.equals("Value")) {
@@ -502,6 +563,10 @@ public class XMLConfiguration extends DefaultHandler {
 		data = str.toString();
 	}
 
+	public void editUsingGui() {
+		new XMLEditGui(this).displayGUI();
+	}
+
 	/**
 	 * Standard main method to excersize this object.
 	 * 
@@ -513,7 +578,8 @@ public class XMLConfiguration extends DefaultHandler {
 		xml.addValue("TestInt1", 15);
 		xml.addValue("TestInt2", 20, "This is a test Integer");
 		xml.addValue("TestString1", "Test String One");
-		xml.addValue("TestString2", "Test String Two", "This is a Test string, index two");
+		xml.addValue("TestString2", "Test String Two",
+				"This is a Test string, index two");
 		xml.addValue("TestBool1", true);
 		xml.addValue("TestBool2", false, "This is a test boolean value.  NOT.");
 
