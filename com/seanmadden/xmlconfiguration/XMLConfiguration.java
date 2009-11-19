@@ -56,21 +56,26 @@ public class XMLConfiguration extends DefaultHandler {
 	Hashtable<String, XMLDataValue<Boolean>> boolsTable = new Hashtable<String, XMLDataValue<Boolean>>();
 
 	/**
+	 * Hashtable for change callbacks.
+	 */
+	Hashtable<String, XMLEditCallback> callbacks = new Hashtable<String, XMLEditCallback>();
+
+	/**
 	 * This stack is used to maintain the state of the xml tree stack when
 	 * processing an XML file. Subsequent new tags are pushed onto the stack
 	 * while processed and as tags are closed, they're popped off the stack. We
 	 * use this to verify and validate our position as we process the file.
 	 */
-	Stack<String> position = new Stack<String>();
+	private Stack<String> position = new Stack<String>();
 
 	/**
 	 * The following are variables used exclusively when processing a new XML
 	 * file into this object.
 	 */
-	String data = "";
-	String dataName = "";
-	String dataValue = "";
-	String dataDesc = "";
+	private String data = "";
+	private String dataName = "";
+	private String dataValue = "";
+	private String dataDesc = "";
 
 	/**
 	 * Default constructor.
@@ -209,21 +214,28 @@ public class XMLConfiguration extends DefaultHandler {
 	}
 
 	/**
-	* Updates a value in the current system.
-	* 
-	* @param name The key to retrieve
-	* @param value - The value to set it to.
-	*/
+	 * Updates a value in the current system.
+	 * 
+	 * @param name
+	 *            The key to retrieve
+	 * @param value
+	 *            - The value to set it to.
+	 */
 	public void updateValue(String name, String value) {
 		XMLDataValue<String> val = stringsTable.get(name);
 		if (val == null) {
 			addValue(name, value);
-			return;
+		} else {
+
+			XMLDataValue<String> newVal = new XMLDataValue<String>(val
+					.getName(), val.getValue(), val.getDescription());
+			stringsTable.put(name, newVal);
 		}
 
-		XMLDataValue<String> newVal = new XMLDataValue<String>(val.getName(),
-				val.getValue(), val.getDescription());
-		stringsTable.put(name, newVal);
+		XMLEditCallback cb = callbacks.get(name);
+		if (cb != null) {
+			cb.update(this, name);
+		}
 	}
 
 	/**
@@ -279,23 +291,30 @@ public class XMLConfiguration extends DefaultHandler {
 	public void addValue(String name, Integer value) {
 		addValue(name, value, null);
 	}
-	
+
 	/**
-	* Updates the values for an integer.
-	* 
-	* @param name the key to retrieve
-	* @param value the update to push down.
-	*/
-	public void updateValue(String name, Integer value){
+	 * Updates the values for an integer.
+	 * 
+	 * @param name
+	 *            the key to retrieve
+	 * @param value
+	 *            the update to push down.
+	 */
+	public void updateValue(String name, Integer value) {
 		XMLDataValue<Integer> val = intsTable.get(name);
 		if (val == null) {
 			addValue(name, value);
-			return;
+		} else {
+
+			XMLDataValue<Integer> newVal = new XMLDataValue<Integer>(val
+					.getName(), val.getValue(), val.getDescription());
+			intsTable.put(name, newVal);
 		}
 
-		XMLDataValue<Integer> newVal = new XMLDataValue<Integer>(val.getName(),
-				val.getValue(), val.getDescription());
-		intsTable.put(name, newVal);
+		XMLEditCallback cb = callbacks.get(name);
+		if (cb != null) {
+			cb.update(this, name);
+		}
 	}
 
 	/**
@@ -354,23 +373,30 @@ public class XMLConfiguration extends DefaultHandler {
 	}
 
 	/**
-	* Retrieves and updates the boolean specified by name
-	* 
-	* @param name the key to retrieve
-	* @param value the value to update it to.
-	*/
-	public void updateValue(String name, Boolean value){
+	 * Retrieves and updates the boolean specified by name
+	 * 
+	 * @param name
+	 *            the key to retrieve
+	 * @param value
+	 *            the value to update it to.
+	 */
+	public void updateValue(String name, Boolean value) {
 		XMLDataValue<Boolean> val = boolsTable.get(name);
 		if (val == null) {
 			addValue(name, value);
-			return;
-		}
+		} else {
 
-		XMLDataValue<Boolean> newVal = new XMLDataValue<Boolean>(val.getName(),
-				val.getValue(), val.getDescription());
-		boolsTable.put(name, newVal);
+			XMLDataValue<Boolean> newVal = new XMLDataValue<Boolean>(val
+					.getName(), val.getValue(), val.getDescription());
+			boolsTable.put(name, newVal);
+		}
+		
+		XMLEditCallback cb = callbacks.get(name);
+		if(cb != null){
+			cb.update(this, name);
+		}
 	}
-	
+
 	/**
 	 * Adds a new Boolean directive to this object
 	 * 
@@ -563,8 +589,22 @@ public class XMLConfiguration extends DefaultHandler {
 		data = str.toString();
 	}
 
+	/**
+	 * Spawn off a GUI to edit me.
+	 * 
+	 */
 	public void editUsingGui() {
 		new XMLEditGui(this).displayGUI();
+	}
+
+	/**
+	* Registers a callback for the key specified by name.
+	* 
+	* @param name
+	* @param callbackPointer
+	*/
+	public void registerCallback(String name, XMLEditCallback callbackPointer) {
+		callbacks.put(name, callbackPointer);
 	}
 
 	/**
