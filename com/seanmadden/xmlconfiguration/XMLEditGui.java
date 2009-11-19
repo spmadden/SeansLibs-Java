@@ -22,12 +22,14 @@
  */
 package com.seanmadden.xmlconfiguration;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Map.Entry;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -45,7 +47,9 @@ import javax.swing.JTextField;
  * 
  * @author Sean P Madden
  */
-public class XMLEditGui {
+public class XMLEditGui implements ActionListener {
+	private JFrame panel = new JFrame("Edit Configuration");
+	
 	/**
 	 * A reference to the XML Configuration object we're editing.
 	 */
@@ -61,42 +65,14 @@ public class XMLEditGui {
 	private class TableRow {
 		JComponent label;
 		JComponent edit;
+		String name;
+		String type;
 	}
 
 	/**
 	 * This is the containers of JComponents that the GUI will be using.
 	 */
 	private Vector<TableRow> components = new Vector<TableRow>();
-
-	/**
-	 * This is the ActionListener we're going to use to process the Strings when
-	 * they're changed.
-	 */
-	private ActionListener stringListener = new ActionListener() {
-		public void actionPerformed(ActionEvent arg0) {
-
-		}
-	};
-
-	/**
-	 * This is the ActionListener we're going to use to process the Integers
-	 * when they're changed
-	 */
-	private ActionListener intsListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-
-		}
-	};
-
-	/**
-	 * This is the ActionListener we're going to use to process the Booleans
-	 * when they're done.
-	 */
-	private ActionListener boolsListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-
-		}
-	};
 
 	/**
 	 * Can't have a GUI to edit NULL!
@@ -108,37 +84,93 @@ public class XMLEditGui {
 	}
 
 	protected void displayGUI() {
-		for(Entry<String, XMLDataValue<String>> ent : config.stringsTable.entrySet()){
+		for (Entry<String, XMLDataValue<String>> ent : config.stringsTable
+				.entrySet()) {
 			JTextField comp = new JTextField();
 			comp.setText(ent.getValue().getValue());
 			comp.setActionCommand(ent.getKey());
-			comp.addActionListener(stringListener);
 			JLabel label = new JLabel(ent.getValue().getDescription());
-			
+
 			TableRow row = new TableRow();
 			row.label = label;
 			row.edit = comp;
-			
+			row.name = ent.getKey();
+			row.type = "String";
+
 			components.add(row);
 		}
-		
-		for(Entry<String, XMLDataValue<Integer>> ent : config.intsTable.entrySet()){
+
+		for (Entry<String, XMLDataValue<Integer>> ent : config.intsTable
+				.entrySet()) {
 			JTextField comp = new JTextField();
 			comp.setText(ent.getValue().getValue().toString());
 			comp.setActionCommand(ent.getKey());
-			comp.addActionListener(intsListener);
 			JLabel label = new JLabel(ent.getValue().getDescription());
-			
+
 			TableRow row = new TableRow();
 			row.edit = comp;
 			row.label = label;
-			
+			row.name = ent.getKey();
+			row.type = "Integer";
+
 			components.add(row);
-			
 		}
+
+		panel.setLayout(new GridLayout(components.size() + 1, 2));
+		for (TableRow comp : components) {
+			panel.add(comp.label);
+			panel.add(comp.edit);
+		}
+		JButton saveButton = new JButton("Save");
+		saveButton.addActionListener(this);
+		saveButton.setActionCommand("SaveXML");
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(this);
+		cancelButton.setActionCommand("CancelClose");
+
+		panel.add(saveButton);
+		panel.add(cancelButton);
 		
-		JFrame panel = new JFrame("Edit Configuration");
-		
-		
+		panel.pack();
+		panel.setVisible(true);
+		panel.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+	}
+
+	public static void main(String[] args) {
+		XMLConfiguration xml = new XMLConfiguration();
+
+		xml.addValue("TestInt1", 15);
+		xml.addValue("TestInt2", 20, "This is a test Integer");
+		xml.addValue("TestString1", "Test String One");
+		xml.addValue("TestString2", "Test String Two",
+				"This is a Test string, index two");
+		xml.addValue("TestBool1", true);
+		xml.addValue("TestBool2", false, "This is a test boolean value.  NOT.");
+
+		XMLEditGui gui = new XMLEditGui(xml);
+		gui.displayGUI();
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		String cmd = e.getActionCommand();
+		if (cmd.equals("SaveXML")) {
+			for (TableRow row : components) {
+				if (row.type.equals("Integer")) {
+					JTextField field = (JTextField) row.edit;
+					JLabel label = (JLabel) row.label;
+					config.addValue(row.name, Integer.valueOf(field.getText()),
+							label.getText());
+				}else if(row.type.equals("String")){
+					JTextField field = (JTextField) row.edit;
+					JLabel label = (JLabel) row.label;
+					config.addValue(row.name, field.getText(), label.getText());
+				}
+			}
+			System.out.println(config.generateXML());
+			panel.dispose();
+		}else if(cmd.equals("CancelXML")){
+			panel.dispose();
+		}
 	}
 }
