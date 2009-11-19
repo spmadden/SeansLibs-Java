@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Sat Nov 14 07:04:26 EST 2009
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=SeansLibs-Java.jar
+manifest.mergeall=true
+manifest.mainclass=
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=<po|SeansLibs-Java>~SeansLibs-Java.jar;<po|SeansLibs-Java>~configuration.xml
+includes=

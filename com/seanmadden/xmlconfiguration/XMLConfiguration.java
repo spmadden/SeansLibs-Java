@@ -29,30 +29,87 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+/**
+ * This class represents the xml configuration manager. It acts as a central
+ * access point for all xml configuration read/write operations.
+ * 
+ * @author Sean P Madden
+ */
 public class XMLConfiguration extends DefaultHandler {
+	/**
+	 * Basic name for the configuration. This is used as the main document XML
+	 * Tag. IE, All values are elements of this tag.
+	 */
 	private String name = "XMLConfiguration";
-	Hashtable<String, String> stringsTable = new Hashtable<String, String>();
-	Hashtable<String, Integer> intsTable = new Hashtable<String, Integer>();
-	Hashtable<String, Boolean> boolsTable = new Hashtable<String, Boolean>();
+	/**
+	 * A Table of all of our string configuration values, indexed by name.
+	 */
+	Hashtable<String, XMLDataValue<String>> stringsTable = new Hashtable<String, XMLDataValue<String>>();
+	/**
+	 * A Table of all of our Integer configuration values, again, indexed by
+	 * name
+	 */
+	Hashtable<String, XMLDataValue<Integer>> intsTable = new Hashtable<String, XMLDataValue<Integer>>();
+	/**
+	 * A table of all of our Boolean values, shockingly indexed by name.
+	 */
+	Hashtable<String, XMLDataValue<Boolean>> boolsTable = new Hashtable<String, XMLDataValue<Boolean>>();
 
+	/**
+	 * This stack is used to maintain the state of the xml tree stack when
+	 * processing an XML file. Subsequent new tags are pushed onto the stack
+	 * while processed and as tags are closed, they're popped off the stack. We
+	 * use this to verify and validate our position as we process the file.
+	 */
 	Stack<String> position = new Stack<String>();
+
+	/**
+	 * The following are variables used exclusively when processing a new XML
+	 * file into this object.
+	 */
 	String data = "";
 	String dataName = "";
+	String dataValue = "";
+	String dataDesc = "";
 
+	/**
+	 * Default constructor.
+	 * 
+	 */
 	public XMLConfiguration() {
 		this.name = "XMLConfiguration";
 	}
 
+	/**
+	 * This constructor accepts a name parameter and uses the name for the
+	 * global name of this XML Configuration. See the comments under the Name
+	 * varbl above.
+	 * 
+	 * @param name
+	 *            - String representing this XML Configuration
+	 */
 	public XMLConfiguration(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Resets and clears out ALL values in this data object
+	 * 
+	 */
 	public void resetConfiguration() {
 		stringsTable.clear();
 		intsTable.clear();
 		boolsTable.clear();
 	}
 
+	/**
+	 * Iterates over all of the values in this data type and generates an XML
+	 * representation of it. It's broken into three parts, The name, the Value
+	 * and the Description of the directive
+	 * 
+	 * @return String representation of the current state of this object, in XML
+	 *         format.
+	 */
 	public String generateXML() {
 
 		StringBuilder str = new StringBuilder();
@@ -71,66 +128,253 @@ public class XMLConfiguration extends DefaultHandler {
 		str.append("</" + this.name + ">\r\n");
 
 		return str.toString();
+
 	}
 
+	/**
+	 * Submethod to generate the XML representation of all string directives
+	 * 
+	 * @return String representation of the Strings, in XML format
+	 */
 	private String generateStringsXML() {
 		StringBuilder str = new StringBuilder();
-		str.append("<Strings>\r\n");
-		for (Map.Entry<String, String> ent : stringsTable.entrySet()) {
-			str.append("\t<Value name=\"" + ent.getKey() + "\">"
-					+ ent.getValue() + "</Value>\r\n");
+		for (Map.Entry<String, XMLDataValue<String>> ent : stringsTable
+				.entrySet()) {
+			str.append("<String>\r\n");
+			str.append("\t<Name>" + ent.getKey() + "</Name>\r\n");
+			str
+					.append("\t<Value>" + ent.getValue().getValue()
+							+ "</Value>\r\n");
+			str.append("\t<Description>" + ent.getValue().getDescription()
+					+ "</Description>\r\n");
+			str.append("</String>\r\n");
 		}
-		str.append("</Strings>\r\n");
 		return str.toString();
 	}
 
+	/**
+	 * Generates an XML representation of the Integer directives contained
+	 * within
+	 * 
+	 * @return String representation of the Integer directives, in XML Format
+	 */
 	private String generateIntsXML() {
 		StringBuilder str = new StringBuilder();
-		str.append("<Integers>\r\n");
-		for (Map.Entry<String, Integer> ent : intsTable.entrySet()) {
-			str.append("\t<Value name=\"" + ent.getKey() + "\">"
-					+ ent.getValue() + "</Value>\r\n");
+		for (Map.Entry<String, XMLDataValue<Integer>> ent : intsTable
+				.entrySet()) {
+			str.append("<Integer>\r\n");
+			str.append("\t<Name>" + ent.getKey() + "</Name>\r\n");
+			str
+					.append("\t<Value>" + ent.getValue().getValue()
+							+ "</Value>\r\n");
+			str.append("\t<Description>" + ent.getValue().getDescription()
+					+ "</Description>\r\n");
+			str.append("</Integer>\r\n");
 		}
-		str.append("</Integers>\r\n");
 		return str.toString();
 	}
 
+	/**
+	 * Generates the string representation of all of the Boolean values
+	 * contained within this object.... In XML Format
+	 * 
+	 * @return String representatino of the Booleans, In XML Format.
+	 */
 	private String generateBoolsXML() {
 		StringBuilder str = new StringBuilder();
-		str.append("<Booleans>\r\n");
-		for (Map.Entry<String, Boolean> ent : boolsTable.entrySet()) {
-			str.append("\t<Value name=\"" + ent.getKey() + "\">"
-					+ ent.getValue() + "</Value>\r\n");
+		for (Map.Entry<String, XMLDataValue<Boolean>> ent : boolsTable
+				.entrySet()) {
+			str.append("<Boolean>\r\n");
+			str.append("\t<Name>" + ent.getKey() + "</Name>\r\n");
+			str
+					.append("\t<Value>" + ent.getValue().getValue()
+							+ "</Value>\r\n");
+			str.append("\t<Description>" + ent.getValue().getDescription()
+					+ "</Description>\r\n");
+			str.append("</Boolean>\r\n");
 		}
-		str.append("</Booleans>\r\n");
 		return str.toString();
 	}
 
+	/**
+	 * Adds a String configuration directive
+	 * 
+	 * @param name
+	 *            The name of the directive to be referenced by
+	 * @param value
+	 *            The value of the directive
+	 */
 	public void addValue(String name, String value) {
-		stringsTable.put(name, value);
-	}
-	
-	public String getStringValue(String name){
-		return stringsTable.get(name);
+		addValue(name, value, null);
 	}
 
+	/**
+	 * Adds a String configuration directive
+	 * 
+	 * @param name
+	 *            The name of the directive to be referenced by
+	 * @param value
+	 *            The value of the directive
+	 * @param desc
+	 *            The description of the directive
+	 */
+	public void addValue(String name, String value, String desc) {
+		stringsTable.put(name, new XMLDataValue<String>(name, value, desc));
+	}
+
+	/**
+	 * Retrieve and return A string directive by name
+	 * 
+	 * @param name
+	 *            The name of the directive to return
+	 * @return The string value of the directive, NULL if non-existant
+	 */
+	public String getStringValue(String name) {
+		XMLDataValue<String> val = stringsTable.get(name);
+		if (val == null)
+			return null;
+		return val.getValue();
+	}
+
+	/**
+	 * Retrieves and returns the description of the string identified by Name
+	 * 
+	 * @param name
+	 *            the name of the directive to retrieve
+	 * @return the description of the directive
+	 */
+	public String getStringDesc(String name) {
+		XMLDataValue<String> val = stringsTable.get(name);
+		if (val == null)
+			return null;
+		return val.getDescription();
+	}
+
+	/**
+	 * Adds a new Integer directive to this object
+	 * 
+	 * @param name
+	 *            The name of the directive to be referenced by
+	 * @param value
+	 *            The value of the directive
+	 */
 	public void addValue(String name, Integer value) {
-		intsTable.put(name, value);
+		addValue(name, value, null);
 	}
 
-	public Integer getIntegerValue(String name){
-		return intsTable.get(name);
+	/**
+	* Adds a new Integer directive to this object
+	* 
+	* @param name The name of the directive to be referenced by
+	* @param value The value of the directive
+	* @param desc The description of the directive
+	*/
+	public void addValue(String name, Integer value, String desc){
+		intsTable.put(name, new XMLDataValue<Integer>(name, value, desc));
 	}
 	
+	/**
+	 * Retrieves and returns the value of the Integer represented by name
+	 * 
+	 * @param name the name of the directive to retrieve
+	 * @return the value of the directive, null if non-existent
+	 */
+	public Integer getIntegerValue(String name) {
+		XMLDataValue<Integer> val = intsTable.get(name);
+		if (val == null)
+			return null;
+		return val.getValue();
+	}
+
+	/**
+	 * Retrieves and returns description of the Integer directive represented by
+	 * name
+	 * 
+	 * @param name
+	 *            the name of the directive to retrieve
+	 * @return the description of the integer, null if non-existent
+	 */
+	public String getIntegerDesc(String name) {
+		XMLDataValue<Integer> val = intsTable.get(name);
+		if (val == null)
+			return null;
+		return val.getDescription();
+	}
+
+	/**
+	 * Adds a new Boolean directive to this object
+	 * 
+	 * @param name
+	 *            The name the directive will be referenced by
+	 * @param value
+	 *            The value of the directive
+	 */
 	public void addValue(String name, Boolean value) {
-		boolsTable.put(name, value);
+		addValue(name, value, null);
 	}
 	
-	public Boolean getBooleanValue(String name){
-		return boolsTable.get(name);
+	/**
+	* Adds a new Boolean directive to this object
+	* 
+	* @param name The name of the directive will be referenced by
+	* @param value The value of the directive
+	* @param desc The description of the directive.
+	*/
+	public void addValue(String name, Boolean value, String desc){
+		boolsTable.put(name, new XMLDataValue<Boolean>(name, value, desc));
 	}
 
-	public boolean writeToXMLFile(String filename){
+	/**
+	 * Retrieve and return the boolean value represented by a directive
+	 * 
+	 * @param name
+	 *            The name of the directive to retrieve
+	 * @return The Boolean value of the directive represented by Name, NULL if
+	 *         non-existent
+	 */
+	public Boolean getBooleanValue(String name) {
+		XMLDataValue<Boolean> val = boolsTable.get(name);
+		if (val == null)
+			return null;
+		return val.getValue();
+	}
+
+	/**
+	 * Retrieves and returns the description of the boolean directive
+	 * represented by name
+	 * 
+	 * @param name
+	 *            the name of the directive to retrieve.
+	 * @return the description of the directive, null if non-existent.
+	 */
+	public String getBooleanDescription(String name) {
+		XMLDataValue<Boolean> val = boolsTable.get(name);
+		if (val == null)
+			return null;
+		return val.getDescription();
+	}
+
+	/**
+	 * Sets the name of this XML Configuration object. See the comment above on
+	 * the 'name' variable for explanation.
+	 * 
+	 * @param name
+	 *            The name to set.
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Generates the String representation of the current state of this object,
+	 * then writes it to the file specified by 'filename'. If successful,
+	 * returns true; false on any errors
+	 * 
+	 * @param filename
+	 *            The file to open
+	 * @return success - true if successful, false otherwise
+	 */
+	public boolean writeToXMLFile(String filename) {
 		FileWriter file;
 		try {
 			file = new FileWriter(new File(filename));
@@ -143,7 +387,16 @@ public class XMLConfiguration extends DefaultHandler {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * This method accepts a file and populates itself with the values contained
+	 * within it. IT DOES NOT CLEAR OUT THE CURRENT STATE OF THIS OBJECT. It
+	 * WILL append any data (overwriting if necessary) to this object
+	 * 
+	 * @param filename
+	 *            The filename to open.
+	 * @return success - true if successful, false otherwise
+	 */
 	public boolean parseXMLFile(String filename) {
 		try {
 			XMLReader xr = XMLReaderFactory.createXMLReader();
@@ -162,40 +415,86 @@ public class XMLConfiguration extends DefaultHandler {
 		return true;
 	}
 
+	/**
+	 * This method is not to be called. It is used by the XML Parser.
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#startDocument()
+	 */
 	public void startDocument() {
 		position = new Stack<String>();
 	}
 
+	/**
+	 * This method is not to be called. IT is used by the XML Parser.
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
+	 *      java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 * @param uri
+	 * @param name
+	 * @param qName
+	 * @param atts
+	 */
 	public void startElement(String uri, String name, String qName,
 			Attributes atts) {
 		position.push(name);
-		System.out.println(position);
-		for (int i = 0; i < atts.getLength(); i++) {
-			if (atts.getQName(i).equals("name")) {
-				dataName = atts.getValue(i);
-			}
-
-		}
 	}
 
+	/**
+	 * This method is not to be called. It is used by the XML Parser
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
+	 *      java.lang.String, java.lang.String)
+	 * @param uri
+	 * @param name
+	 * @param qName
+	 */
 	public void endElement(String uri, String name, String qName) {
-		position.pop();
+		String lastPos = position.pop();
 
-		if (dataName.equals("")) {
+		if (lastPos.equals("Name")) {
+			dataName = data.trim();
+		} else if (lastPos.equals("Value")) {
+			dataValue = data.trim();
+		} else if (lastPos.equals("Description")) {
+			dataDesc = data.trim();
+			;
+		}
+		data = "";
+
+		if (dataName.equals("") || dataValue.equals("") || dataDesc.equals("")) {
 			return;
 		}
-		if (position.toString().endsWith("Integers]")) {
-			intsTable.put(dataName, Integer.parseInt(data.trim()));
-		} else if (position.toString().endsWith("Strings]")) {
-			stringsTable.put(dataName, data.trim());
-		} else if (position.toString().endsWith("Booleans]")) {
-			boolsTable.put(dataName, Boolean.parseBoolean(data.trim()));
+
+		if (position.toString().endsWith("Integer]")) {
+			Integer value = Integer.parseInt(dataValue);
+			XMLDataValue<Integer> theInt = new XMLDataValue<Integer>(dataName,
+					value, dataDesc);
+			intsTable.put(dataName, theInt);
+		} else if (position.toString().endsWith("String]")) {
+			XMLDataValue<String> theString = new XMLDataValue<String>(dataName,
+					dataValue, dataDesc);
+			stringsTable.put(dataName, theString);
+		} else if (position.toString().endsWith("Boolean]")) {
+			Boolean value = Boolean.parseBoolean(dataValue);
+			XMLDataValue<Boolean> theBool = new XMLDataValue<Boolean>(dataName,
+					value, dataDesc);
+			boolsTable.put(dataName, theBool);
 		}
 
-		dataName = "";
 		data = "";
+		dataName = "";
+		dataValue = "";
+		dataDesc = "";
 	}
 
+	/**
+	 * This method is not to be called. It is used by the XML Parser.
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
+	 * @param ch
+	 * @param start
+	 * @param length
+	 */
 	public void characters(char ch[], int start, int length) {
 		StringBuilder str = new StringBuilder();
 		str.append(data);
@@ -203,15 +502,20 @@ public class XMLConfiguration extends DefaultHandler {
 		data = str.toString();
 	}
 
+	/**
+	 * Standard main method to excersize this object.
+	 * 
+	 * @param args
+	 */
 	public static void main(String args[]) {
 		XMLConfiguration xml = new XMLConfiguration();
 
 		xml.addValue("TestInt1", 15);
-		xml.addValue("TestInt2", 20);
+		xml.addValue("TestInt2", 20, "This is a test Integer");
 		xml.addValue("TestString1", "Test String One");
-		xml.addValue("TestString2", "Test String Two");
+		xml.addValue("TestString2", "Test String Two", "This is a Test string, index two");
 		xml.addValue("TestBool1", true);
-		xml.addValue("TestBool2", false);
+		xml.addValue("TestBool2", false, "This is a test boolean value.  NOT.");
 
 		System.out.println(xml.generateXML());
 		FileWriter file;
