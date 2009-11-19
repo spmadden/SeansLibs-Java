@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<XMLConfiguration>
+	<String>
+		<Name>TestString2</Name>
+		<Value>Test String Two</Value>
+		<Description>This is a Test string, index two</Description>
+	</String>
+	<String>
+		<Name>TestString1</Name>
+		<Value>Test String One</Value>
+		<Description>null</Description>
+	</String>
+	<Integer>
+		<Name>TestInt2</Name>
+		<Value>20</Value>
+		<Description>This is a test Integer</Description>
+	</Integer>
+	<Integer>
+		<Name>TestInt1</Name>
+		<Value>15</Value>
+		<Description>null</Description>
+	</Integer>
+	<Boolean>
+		<Name>TestBool1</Name>
+		<Value>true</Value>
+		<Description>null</Description>
+	</Boolean>
+	<Boolean>
+		<Name>TestBool2</Name>
+		<Value>false</Value>
+		<Description>This is a test boolean value.  NOT.</Description>
+	</Boolean>
+</XMLConfiguration>
