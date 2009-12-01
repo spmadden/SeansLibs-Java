@@ -21,9 +21,7 @@
 *
 */
 package com.seanmadden.xmlconfiguration;
-public class XMLDataValue<T extends Object> {
-	private T value;
-	private Class type;
+public abstract class XMLDataValue<T extends Object> {
 	private String name;
 	private String description;
 	
@@ -31,30 +29,21 @@ public class XMLDataValue<T extends Object> {
 		
 	}
 	
-	public XMLDataValue(String name, T value){
-		setValue(value);
+	public XMLDataValue(String name){
 		setName(name);
 	}
 	
-	public XMLDataValue(String name, T value, String desc){
-		setValue(value);
+	public XMLDataValue(String name, String desc){
 		setName(name);
 		setDescription(desc);
 	}
 	
-	public String getType(){
-		return type.getCanonicalName();
-	}
-	
-	public T getValue(){
-		return value;
-	}
-	
-	public void setValue(T value){
-		this.value = value;
-		this.type = value.getClass();
-		
-	}
+	public abstract T getValue();
+	public abstract void setValue(T value);
+	public abstract String getXML();
+	public abstract XMLDataValue<T> processXML(String xml);
+	public abstract String acceptedDataType();
+	public abstract Class<?> getProcessType();
 	
 	public void setName(String name){
 		this.name = name;
