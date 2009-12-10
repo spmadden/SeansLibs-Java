@@ -1,0 +1,15 @@
+{
+	"SerialBaud":"19200",
+	"SerialPort":"COM1",
+	"OperatorName": "Sean",
+	"SerialStopBits": "1",
+	"SerialParity": "0",
+	"StringBreakLength": "50",
+	"SerialBits": "8",
+	"testSubobject" : {
+		"subVal1" : "temp",
+		"subVal2" : "temp2"
+	},
+	"testSubArray" : [ 1, 2, 3,
+	"four", "five]
+}
