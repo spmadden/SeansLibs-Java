@@ -35,7 +35,7 @@ public class JSONObject {
 		this(JSONObjectType.OBJECT);
 		tok = new JSONTokenizer(jsonData);
 		JSONObject object = parse(null);
-		
+
 		this.values = object.values;
 		this.array = object.array;
 		this.type = object.type;
@@ -56,13 +56,34 @@ public class JSONObject {
 	public void addValue(String name, String value) {
 		values.put(name, value);
 	}
-	
+
+	public String getString(String name) throws JSONException {
+		if (values.get(name) == null) {
+			throw new JSONException("Key not found.");
+		}
+		return values.get(name);
+	}
+
+	public Integer getInt(String name) throws JSONException {
+		if (values.get(name) == null) {
+			throw new JSONException("Key not found.");
+		}
+		Integer in = 0;
+		try {
+			in = Integer.parseInt(values.get(name));
+		} catch (NumberFormatException e) {
+			throw new JSONException("Value does not represent an integer: ("
+					+ name + " : " + values.get(name) + ")");
+		}
+		return in;
+	}
+
 	protected JSONObject parse(JSONObject in) {
 		String name = null;
 		while (tok.hasNext()) {
 			String item = tok.nextToken();
 			if (item.equals(":")) {
-				//yay nothing. absorb the token.
+				// yay nothing. absorb the token.
 			} else if (item.equals("{")) {
 				JSONObject newObj = parseSubObject();
 				if (name != null) {
@@ -75,7 +96,7 @@ public class JSONObject {
 				in.addSubObject(name, newObj);
 				name = null;
 			} else if (item.equals(",")) {
-				// yay nothing.  absorb the token
+				// yay nothing. absorb the token
 			} else if (item.equals("}")) {
 				break;
 			} else {
@@ -138,13 +159,13 @@ public class JSONObject {
 		}
 		Entry<String, JSONObject>[] setObj = (Entry<String, JSONObject>[]) subObjects
 				.entrySet().toArray(new Entry[] {});
-		for(int i = 0; i < setObj.length; i++){
+		for (int i = 0; i < setObj.length; i++) {
 			if (addWhitespace) {
 				buf.append("\t");
 			}
 			String json = setObj[i].getKey() + ":"
 					+ setObj[i].getValue().toJSON(addWhitespace);
-			if(i < setObj.length -1){
+			if (i < setObj.length - 1) {
 				json += ",";
 			}
 			if (addWhitespace) {
