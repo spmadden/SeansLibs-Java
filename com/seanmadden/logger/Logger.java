@@ -89,9 +89,12 @@ public class Logger {
 		log.debug(LogEvent.FATAL, "FATAL ERROR");
 		
 		try {
-			log.addWriter(new FileWriter("test.log"));
+			FileWriter writer = new FileWriter("test.log");
+			log.addWriter(writer);
 			log.debug(LogEvent.INFO, "I should appear in the file");
 			log.debug(LogEvent.TRACE, "SO SHOULD I");
+			writer.flush();
+			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
