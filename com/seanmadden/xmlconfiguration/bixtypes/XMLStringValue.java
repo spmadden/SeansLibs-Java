@@ -22,15 +22,9 @@
 */
 package com.seanmadden.xmlconfiguration.bixtypes;
 
-import java.io.IOException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import com.seanmadden.xmlconfiguration.XMLDataValue;
-import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLFormatException;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLTokenizer;
 
 
 /**
@@ -39,50 +33,6 @@ import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
 * @author Sean P Madden
 */
 public class XMLStringValue extends XMLDataValue<String> {
-	
-	/**
-	* This class is the base XML Processor using the SAX framework.
-	*
-	* @author Sean P Madden
-	*/
-	private class XMLStringProcessor extends XMLProcessor{
-		XMLStringValue strVal = null;
-		
-		/**
-		 * Creates a StringXMLProcessor with a reference to it's parent object
-		 *
-		 * @param value
-		 */
-		public XMLStringProcessor(XMLStringValue value){
-			strVal = value;
-		}
-
-		/**
-		 * Processes the string value of the object.
-		 *
-		 * @see com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor#processValue(java.lang.String)
-		 * @param value
-		 */
-		protected void processValue(String value) {
-			strVal.setValue(value);
-		}
-
-		/**
-		 * Determines whether this is the end of the string XML directive
-		 *
-		 * @see com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor#isXMLComplete(java.lang.String)
-		 * @param position
-		 * @return
-		 */
-		protected boolean isXMLComplete(String position) {
-			if(position.endsWith("String]")){
-				return true;
-			}
-			return false;
-		}
-		
-		
-	}
 	
 	/**
 	 * Our happy string value
@@ -137,23 +87,22 @@ public class XMLStringValue extends XMLDataValue<String> {
 	 * @see com.seanmadden.xmlconfiguration.XMLDataValue#processXML(java.lang.String)
 	 * @param xml
 	 * @return
+	 * @throws XMLFormatException 
 	 */
-	public XMLStringValue processXML(String xml) {
-		XMLStringValue val = new XMLStringValue();
-		try {
-			XMLReader xr = XMLReaderFactory.createXMLReader();
-			XMLProcessor parser = new XMLStringProcessor(val);
-			xr.setContentHandler(parser);
-			xr.setErrorHandler(parser);
-			xr.parse(new InputSource(xml));
-		} catch (SAXException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+	public XMLStringValue processXML(String xml) throws XMLFormatException {
+		XMLTokenizer token = new XMLTokenizer(xml);
+		XMLStringValue str = new XMLStringValue();
+		while(token.hasNext()){
+			String next = token.nextToken();
+			if(next.toLowerCase().matches(".*<name>.*")){
+				str.setName(token.nextToken());
+			}else if(next.toLowerCase().matches(".*<description>.*")){
+				str.setDescription(token.nextToken());
+			}else if(next.toLowerCase().matches(".*<value>.*")){
+				str.setValue(token.nextToken());
+			}
 		}
-		return val;
+		return str;
 	}
 
 	/**
@@ -186,6 +135,12 @@ public class XMLStringValue extends XMLDataValue<String> {
 	 */
 	public Class<?> getProcessType() {
 		return String.class;
+	}
+	
+	public String toString(){
+		StringBuffer buf = new StringBuffer();
+		buf.append("[XMLStringValue name=\"" + this.getName() + "\" value=\"" + this.getValue() +"\" description=\""+this.getDescription()+"\"]");
+		return buf.toString();
 	}
 	
 }

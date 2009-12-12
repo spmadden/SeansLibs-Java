@@ -21,6 +21,9 @@
 *
 */
 package com.seanmadden.xmlconfiguration;
+
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLFormatException;
+
 public abstract class XMLDataValue<T extends Object> {
 	private String name;
 	private String description;
@@ -41,7 +44,7 @@ public abstract class XMLDataValue<T extends Object> {
 	public abstract T getValue();
 	public abstract void setValue(T value);
 	public abstract String getXML();
-	public abstract XMLDataValue<T> processXML(String xml);
+	public abstract XMLDataValue<T> processXML(String xml) throws XMLFormatException;
 	public abstract String acceptedDataType();
 	public abstract Class<?> getProcessType();
 	

@@ -25,14 +25,11 @@ package com.seanmadden.xmlconfiguration;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import com.seanmadden.xmlconfiguration.bixtypes.XMLBooleanValue;
 import com.seanmadden.xmlconfiguration.bixtypes.XMLIntegerValue;
 import com.seanmadden.xmlconfiguration.bixtypes.XMLStringValue;
-import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLFormatException;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLParser;
 
 /**
  * This class represents the xml configuration manager. It acts as a central
@@ -41,33 +38,7 @@ import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
  * @author Sean P Madden
  */
 public class XMLConfiguration {
-	
-	protected class XMLMasterParser extends XMLProcessor{
-		
-		XMLConfiguration config = null;
-		XMLDataValue<?> type = null;
-		public XMLMasterParser(XMLConfiguration config){
-			this.config = config;
-		}
 
-		protected boolean isXMLComplete(String position) {
-			for(XMLDataValue<?> type : config.valueTypes){
-				if(position.endsWith(type.acceptedDataType() + "]")){
-					this.type = type;
-					return true;
-				}
-			}
-			return false;
-		}
-
-		protected void processValue(String value) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		
-	}
-	
 	/**
 	 * Basic name for the configuration. This is used as the main document XML
 	 * Tag. IE, All values are elements of this tag.
@@ -113,7 +84,7 @@ public class XMLConfiguration {
 		dataTable.clear();
 		callbacks.clear();
 		valueTypes.clear();
-		
+
 		valueTypes.add(new XMLIntegerValue());
 		valueTypes.add(new XMLBooleanValue());
 		valueTypes.add(new XMLStringValue());
@@ -133,11 +104,11 @@ public class XMLConfiguration {
 		str.append("<?xml version=\"1.0\"?>\r\n");
 		str.append("<" + this.name + ">\r\n");
 
-		String strings = "";
+		StringBuffer strings = new StringBuffer();
 		for (Map.Entry<String, XMLDataValue<Object>> val : dataTable.entrySet()) {
-			strings += val.getValue().getXML();
+			strings.append(val.getValue().getXML());
 		}
-		Scanner scan = new Scanner(strings);
+		Scanner scan = new Scanner(strings.toString());
 		while (scan.hasNextLine()) {
 			String line = scan.nextLine();
 			str.append("\t" + line + "\r\n");
@@ -161,8 +132,18 @@ public class XMLConfiguration {
 	 */
 	public XMLDataValue<Object> findValueType(Object value) {
 		for (XMLDataValue<?> val : valueTypes) {
-			if (val.getProcessType().toString().equals(value.getClass().toString())) {
-				return (XMLDataValue<Object>)val;
+			if (val.getProcessType().toString().equals(
+					value.getClass().toString())) {
+				return (XMLDataValue<Object>) val;
+			}
+		}
+		return null;
+	}
+
+	public XMLDataValue<Object> findParser(String value) {
+		for (XMLDataValue<?> val : valueTypes) {
+			if (val.acceptedDataType().equals(value)) {
+				return (XMLDataValue<Object>) val;
 			}
 		}
 		return null;
@@ -279,24 +260,25 @@ public class XMLConfiguration {
 	 * @param filename
 	 *            The filename to open.
 	 * @return success - true if successful, false otherwise
+	 * @throws IOException
 	 */
-	public boolean parseXMLFile(String filename) {
-		try {
-			XMLReader xr = XMLReaderFactory.createXMLReader();
-			XMLMasterParser ms = new XMLMasterParser(this);
-			xr.setContentHandler(ms);
-			xr.setErrorHandler(ms);
-			FileReader r = new FileReader(filename);
-			xr.parse(new InputSource(r));
-		} catch (SAXException e) {
-			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
+	public boolean parseXMLFile(String filename) throws IOException {
+		FileReader reader = new FileReader(filename);
+		StringBuffer file = new StringBuffer();
+		while (reader.ready()) {
+			file.append((char) reader.read());
 		}
+		reader.close();
 
-		return true;
+		XMLParser parse = new XMLParser(file.toString(), this);
+		try {
+			return parse.parse();
+		} catch (XMLFormatException e) {
+			e.printStackTrace();
+		} catch (XMLValueTypeNotFoundException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
@@ -350,7 +332,11 @@ public class XMLConfiguration {
 		}
 
 		XMLConfiguration xml2 = new XMLConfiguration();
-		xml2.parseXMLFile("configuration.xml");
+		try {
+			xml2.parseXMLFile("configuration.xml");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		System.out.println(xml2.generateXML());
 
 	}

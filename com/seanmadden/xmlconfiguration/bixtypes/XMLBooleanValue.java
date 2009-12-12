@@ -22,15 +22,9 @@
  */
 package com.seanmadden.xmlconfiguration.bixtypes;
 
-import java.io.IOException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import com.seanmadden.xmlconfiguration.XMLDataValue;
-import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLFormatException;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLTokenizer;
 
 /**
  * [Insert class description here]
@@ -40,47 +34,6 @@ import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
 public class XMLBooleanValue extends XMLDataValue<Boolean> {
 
 	private Boolean value = null;
-
-	/**
-	 * A class to process the XML data structure of a boolean varbl.
-	 * 
-	 * @author Sean P Madden
-	 */
-	private class XMLBooleanProcessor extends XMLProcessor {
-
-		private XMLBooleanValue boolVal = null;
-
-		/**
-		 * Makes me a boolean parser with a reference to the parent value
-		 * 
-		 * @param value
-		 */
-		public XMLBooleanProcessor(XMLBooleanValue value) {
-			boolVal = value;
-		}
-
-		/**
-		 * Returns if the XML data type is complete
-		 * 
-		 * @see com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor#isXMLComplete(java.lang.String)
-		 * @param position
-		 * @return
-		 */
-		protected boolean isXMLComplete(String position) {
-			return position.equals("Boolean]");
-		}
-
-		/**
-		 * Processes the value.
-		 * 
-		 * @see com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor#processValue(java.lang.String)
-		 * @param value
-		 */
-		protected void processValue(String value) {
-			boolVal.setValue(Boolean.valueOf(value));
-		}
-
-	}
 
 	/**
 	 * Returns the value of this object
@@ -114,23 +67,22 @@ public class XMLBooleanValue extends XMLDataValue<Boolean> {
 	 * @see com.seanmadden.xmlconfiguration.XMLDataValue#processXML(java.lang.String)
 	 * @param xml
 	 * @return
+	 * @throws XMLFormatException 
 	 */
-	public XMLBooleanValue processXML(String xml) {
-		XMLBooleanValue val = new XMLBooleanValue();
-		try {
-			XMLReader xr = XMLReaderFactory.createXMLReader();
-			XMLProcessor parser = new XMLBooleanProcessor(val);
-			xr.setContentHandler(parser);
-			xr.setErrorHandler(parser);
-			xr.parse(new InputSource(xml));
-		} catch (SAXException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+	public XMLBooleanValue processXML(String xml) throws XMLFormatException {
+		XMLTokenizer token = new XMLTokenizer(xml);
+		XMLBooleanValue str = new XMLBooleanValue();
+		while(token.hasNext()){
+			String next = token.nextToken();
+			if(next.toLowerCase().matches(".*<name>.*")){
+				str.setName(token.nextToken());
+			}else if(next.toLowerCase().matches(".*<description>.*")){
+				str.setDescription(token.nextToken());
+			}else if(next.toLowerCase().matches(".*<value>.*")){
+				str.setValue(Boolean.valueOf(token.nextToken()));
+			}
 		}
-		return val;
+		return str;
 	}
 
 	/**
@@ -163,6 +115,12 @@ public class XMLBooleanValue extends XMLDataValue<Boolean> {
 	 */
 	public Class<?> getProcessType() {
 		return Boolean.class;
+	}
+	
+	public String toString(){
+		StringBuffer buf = new StringBuffer();
+		buf.append("[XMLBooleanValue name=\"" + this.getName() + "\" value=\"" + this.getValue() +"\" description=\""+this.getDescription()+"\"]");
+		return buf.toString();
 	}
 
 }

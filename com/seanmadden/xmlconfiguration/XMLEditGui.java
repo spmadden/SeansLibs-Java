@@ -91,10 +91,10 @@ public class XMLEditGui implements ActionListener {
 	 * 
 	 */
 	protected void displayGUI() {
-		for (Entry<String, XMLDataValue<String>> ent : config.stringsTable
+		for (Entry<String, XMLDataValue<Object>> ent : config.dataTable
 				.entrySet()) {
 			JTextField comp = new JTextField();
-			comp.setText(ent.getValue().getValue());
+			comp.setText(ent.getValue().getValue()+"");
 			comp.setActionCommand(ent.getKey());
 			JLabel label = new JLabel(ent.getValue().getDescription());
 
@@ -102,41 +102,41 @@ public class XMLEditGui implements ActionListener {
 			row.label = label;
 			row.edit = comp;
 			row.name = ent.getKey();
-			row.type = "String";
+			row.type = ent.getValue().acceptedDataType();
 
 			components.add(row);
 		}
 
-		for (Entry<String, XMLDataValue<Integer>> ent : config.intsTable
-				.entrySet()) {
-			JTextField comp = new JTextField();
-			comp.setText(ent.getValue().getValue().toString());
-			comp.setActionCommand(ent.getKey());
-			JLabel label = new JLabel(ent.getValue().getDescription());
-
-			TableRow row = new TableRow();
-			row.edit = comp;
-			row.label = label;
-			row.name = ent.getKey();
-			row.type = "Integer";
-
-			components.add(row);
-		}
-
-		for (Entry<String, XMLDataValue<Boolean>> ent : config.boolsTable
-				.entrySet()) {
-			JComboBox comp = new JComboBox(new String[] { "Yes", "No" });
-			comp.setActionCommand(ent.getKey());
-			JLabel label = new JLabel(ent.getValue().getDescription());
-
-			TableRow row = new TableRow();
-			row.edit = comp;
-			row.label = label;
-			row.name = ent.getKey();
-			row.type = "Boolean";
-
-			components.add(row);
-		}
+//		for (Entry<String, XMLDataValue<Integer>> ent : config.intsTable
+//				.entrySet()) {
+//			JTextField comp = new JTextField();
+//			comp.setText(ent.getValue().getValue().toString());
+//			comp.setActionCommand(ent.getKey());
+//			JLabel label = new JLabel(ent.getValue().getDescription());
+//
+//			TableRow row = new TableRow();
+//			row.edit = comp;
+//			row.label = label;
+//			row.name = ent.getKey();
+//			row.type = "Integer";
+//
+//			components.add(row);
+//		}
+//
+//		for (Entry<String, XMLDataValue<Boolean>> ent : config.boolsTable
+//				.entrySet()) {
+//			JComboBox comp = new JComboBox(new String[] { "Yes", "No" });
+//			comp.setActionCommand(ent.getKey());
+//			JLabel label = new JLabel(ent.getValue().getDescription());
+//
+//			TableRow row = new TableRow();
+//			row.edit = comp;
+//			row.label = label;
+//			row.name = ent.getKey();
+//			row.type = "Boolean";
+//
+//			components.add(row);
+//		}
 
 		panel.setLayout(new GridLayout(components.size() + 1, 2));
 		for (TableRow comp : components) {
@@ -162,13 +162,19 @@ public class XMLEditGui implements ActionListener {
 	public static void main(String[] args) {
 		XMLConfiguration xml = new XMLConfiguration();
 
-		xml.addValue("TestInt1", 15);
-		xml.addValue("TestInt2", 20, "This is a test Integer");
-		xml.addValue("TestString1", "Test String One");
-		xml.addValue("TestString2", "Test String Two",
-				"This is a Test string, index two");
-		xml.addValue("TestBool1", true);
-		xml.addValue("TestBool2", false, "This is a test boolean value.  NOT.");
+		try {
+			xml.addValue("TestInt1", 15);
+			xml.addValue("TestInt2", 20, "This is a test Integer");
+			xml.addValue("TestString1", "Test String One");
+			xml.addValue("TestString2", "Test String Two",
+					"This is a Test string, index two");
+			xml.addValue("TestBool1", true);
+			xml.addValue("TestBool2", false,
+					"This is a test boolean value.  NOT.");
+			xml.addValue("Showing off 1", "I am showing off", "This is showing off");
+		} catch (XMLValueTypeNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		XMLEditGui gui = new XMLEditGui(xml);
 		gui.displayGUI();
@@ -182,8 +188,12 @@ public class XMLEditGui implements ActionListener {
 					JTextField field = (JTextField) row.edit;
 					JLabel label = (JLabel) row.label;
 					try {
-						config.addValue(row.name, Integer.valueOf(field
-								.getText()), label.getText());
+						try {
+							config.addValue(row.name, Integer.valueOf(field
+									.getText()), label.getText());
+						} catch (XMLValueTypeNotFoundException e1) {
+							e1.printStackTrace();
+						}
 					} catch (NumberFormatException ex) {
 						JOptionPane.showMessageDialog(null, field.getText()
 								+ " is not an integer.", "Error",
@@ -192,12 +202,21 @@ public class XMLEditGui implements ActionListener {
 				} else if (row.type.equals("String")) {
 					JTextField field = (JTextField) row.edit;
 					JLabel label = (JLabel) row.label;
-					config.addValue(row.name, field.getText(), label.getText());
-				} else if(row.type.equals("Boolean")){
+					try {
+						config.addValue(row.name, field.getText(), label
+								.getText());
+					} catch (XMLValueTypeNotFoundException e1) {
+						e1.printStackTrace();
+					}
+				} else if (row.type.equals("Boolean")) {
 					JComboBox field = (JComboBox) row.edit;
 					JLabel label = (JLabel) row.label;
 					Boolean value = field.getSelectedItem().equals("Yes");
-					config.addValue(row.name, value, label.getText());
+					try {
+						config.addValue(row.name, value, label.getText());
+					} catch (XMLValueTypeNotFoundException e1) {
+						e1.printStackTrace();
+					}
 				}
 			}
 			System.out.println(config.generateXML());

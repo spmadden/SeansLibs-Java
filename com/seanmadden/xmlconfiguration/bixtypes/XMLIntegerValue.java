@@ -22,15 +22,9 @@
  */
 package com.seanmadden.xmlconfiguration.bixtypes;
 
-import java.io.IOException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import com.seanmadden.xmlconfiguration.XMLDataValue;
-import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLFormatException;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLTokenizer;
 
 /**
  * This class is an interpreter for an integer xml structure.
@@ -40,49 +34,6 @@ import com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor;
 public class XMLIntegerValue extends XMLDataValue<Integer> {
 
 	private int value = 0;
-
-	/**
-	 * Processes XML for an integer
-	 * 
-	 * @author Sean P Madden
-	 */
-	private class XMLIntegerProcessor extends XMLProcessor {
-		private XMLIntegerValue intVal = null;
-
-		/**
-		 * Maintains a reference to the XMLIntegerValue superobject
-		 * 
-		 * @param value
-		 */
-		public XMLIntegerProcessor(XMLIntegerValue value) {
-			intVal = value;
-		}
-
-		/**
-		 * Returns true if the end of the XML directive
-		 * 
-		 * @see com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor#isXMLComplete(java.lang.String)
-		 * @param position
-		 * @return
-		 */
-		protected boolean isXMLComplete(String position) {
-			if (position.endsWith("Integer]")) {
-				return true;
-			}
-			return false;
-		}
-
-		/**
-		 * Process the string representation of an integer
-		 * 
-		 * @see com.seanmadden.xmlconfiguration.xmlprocessing.XMLProcessor#processValue(java.lang.String)
-		 * @param value
-		 */
-		protected void processValue(String value) {
-			intVal.setValue(Integer.valueOf(value));
-		}
-
-	}
 
 	/**
 	 * Returns the value for this object
@@ -110,23 +61,20 @@ public class XMLIntegerValue extends XMLDataValue<Integer> {
 		return str.toString();
 	}
 
-	public XMLIntegerValue processXML(String xml) {
-		XMLIntegerValue newVal = new XMLIntegerValue();
-		
-		try {
-			XMLReader xr = XMLReaderFactory.createXMLReader();
-			XMLIntegerProcessor parser = new XMLIntegerProcessor(newVal);
-			xr.setContentHandler(parser);
-			xr.setErrorHandler(parser);
-			xr.parse(new InputSource(xml));
-		} catch (SAXException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+	public XMLIntegerValue processXML(String xml) throws NumberFormatException, XMLFormatException {
+		XMLTokenizer token = new XMLTokenizer(xml);
+		XMLIntegerValue str = new XMLIntegerValue();
+		while(token.hasNext()){
+			String next = token.nextToken();
+			if(next.toLowerCase().matches(".*<name>.*")){
+				str.setName(token.nextToken());
+			}else if(next.toLowerCase().matches(".*<description>.*")){
+				str.setDescription(token.nextToken());
+			}else if(next.toLowerCase().matches(".*<value>.*")){
+				str.setValue(Integer.parseInt(token.nextToken()));
+			}
 		}
-		return newVal;
+		return str;
 	}
 
 	/**
@@ -160,4 +108,9 @@ public class XMLIntegerValue extends XMLDataValue<Integer> {
 		return Integer.class;
 	}
 
+	public String toString(){
+		StringBuffer buf = new StringBuffer();
+		buf.append("[XMLIntegerValue name=\"" + this.getName() + "\" value=\"" + this.getValue() +"\" description=\""+this.getDescription()+"\"]");
+		return buf.toString();
+	}
 }
