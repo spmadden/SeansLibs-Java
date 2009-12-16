@@ -1,65 +1,82 @@
-/**
- * 
- */
 package com.seanmadden.xmlconfiguration.xmlprocessing;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.seanmadden.xmlconfiguration.XMLConfiguration;
-import com.seanmadden.xmlconfiguration.XMLDataValue;
-import com.seanmadden.xmlconfiguration.XMLValueTypeNotFoundException;
-
-/**
- * @author spm2732
- *
- */
 public class XMLParser {
-
+	private String data = "";
 	private XMLTokenizer token = null;
-	private static String stElementRex = ".*<(.*)>.*";
-	private static Pattern stElementPattern = Pattern.compile(stElementRex); 
-	private static String eElementStRex = ".*<\\/";
-	private static String eElementERex = ">.*";
-	private XMLConfiguration config = null;
+	private static String startRex = "<(.*).*>";
+	private static Pattern startMatch = Pattern.compile(startRex);
+	private static String endRex = "</(.*)>";
+	private static Pattern endMatch = Pattern.compile(endRex);
+	private static String singleRex = "<(.*)/>";
+	private static Pattern singleMatch = Pattern.compile(singleRex);
 	
-	public XMLParser(String xml, XMLConfiguration config){
-		token = new XMLTokenizer(xml);
-		this.config = config;
+	private XMLParser(String data){
+		this.data = data;
+		token = new XMLTokenizer(data);
 	}
 	
-	public boolean parse() throws XMLFormatException, XMLValueTypeNotFoundException{
+	private DOMElement parse(DOMElement dom) throws XMLFormatException{
+		if(dom == null)
+			dom = new DOMElement();
 		while(token.hasNext()){
-			String element = token.nextToken();
-			if(element.matches(stElementRex)){
-				Matcher match = stElementPattern.matcher(element);
+			String tok = token.nextToken();
+			if(tok.matches(startRex)){
+				Matcher match = startMatch.matcher(tok);
 				match.find();
-				XMLDataValue<?> valueParser = null;
 				String name = match.group(1);
-				if((valueParser = config.findParser(name)) != null){
-					StringBuffer buf = new StringBuffer();
-					Matcher matcher = null;
-					matcher = Pattern.compile(eElementStRex + name + eElementERex).matcher(element);
-					match.find();
-					while(!matcher.matches()){
-						buf.append(element);
-						if(!token.hasNext()){
-							throw new XMLFormatException("Unexpected end of Stream: Unmatched " + valueParser.acceptedDataType() + " end directive.");
-						}
-						element = token.nextToken();
-						matcher.reset(element);
-						matcher.find();
-					}
-					buf.append(element);
-					System.out.println(buf.toString());
-					XMLDataValue<?> data = valueParser.processXML(buf.toString());
-					System.out.println(data);
-					if(data != null)
-						config.addValue(data.getName(), data.getValue(), data.getDescription());
+				DOMElement newDom = new DOMElement(name);
+				System.out.println("SUB: " + name);
+				while((tok != null ) && !tok.matches(endRex)){
+					parse(newDom);
+					tok = token.nextToken();
 				}
+				dom.addSubElement(newDom.getName(), newDom);
+				
+			}else if(tok.matches(singleRex)){
+				
+			}else{
+				// assume textual data.
+				System.out.println(tok);
 			}
 		}
-		return false;
+		return dom;
 	}
 	
+	
+	public void parseAttributesIntoDom(DOMElement dom, String elements){
+		
+	}
+	
+	public static DOMElement parse(String data) throws XMLFormatException{
+		return new XMLParser(data).parse((DOMElement)null);
+	}
+	
+	public static void main(String[] args){
+		try {
+			// http://twitter.com/statuses/user_timeline/75026048.rss
+			// this is a test method to pull ThingsLutzSays on twitter to playwith and parse.
+			URL url = new URL("HTTP", "twitter.com", 80, "/statuses/user_timeline/75026048.rss");
+			HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+			InputStream in = connection.getInputStream();
+			int chr =  -1;
+			StringBuffer str = new StringBuffer();
+			while((chr = in.read()) != -1){
+				str.append((char)chr);
+			}
+			connection.disconnect();
+			parse(str.toString());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (XMLFormatException e) {
+			e.printStackTrace();
+		}
+	}
 }

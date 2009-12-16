@@ -29,7 +29,7 @@ import com.seanmadden.xmlconfiguration.bixtypes.XMLBooleanValue;
 import com.seanmadden.xmlconfiguration.bixtypes.XMLIntegerValue;
 import com.seanmadden.xmlconfiguration.bixtypes.XMLStringValue;
 import com.seanmadden.xmlconfiguration.xmlprocessing.XMLFormatException;
-import com.seanmadden.xmlconfiguration.xmlprocessing.XMLParser;
+import com.seanmadden.xmlconfiguration.xmlprocessing.XMLConfigurationParser;
 
 /**
  * This class represents the xml configuration manager. It acts as a central
@@ -270,7 +270,7 @@ public class XMLConfiguration {
 		}
 		reader.close();
 
-		XMLParser parse = new XMLParser(file.toString(), this);
+		XMLConfigurationParser parse = new XMLConfigurationParser(file.toString(), this);
 		try {
 			return parse.parse();
 		} catch (XMLFormatException e) {
