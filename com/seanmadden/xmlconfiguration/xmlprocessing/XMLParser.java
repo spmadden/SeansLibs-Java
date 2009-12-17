@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class XMLParser {
 	private String data = "";
 	private XMLTokenizer token = null;
-	private static String startRex = "<(.*).*>";
+	private static String startRex = "<([^/](.*)[^/])>";
 	private static Pattern startMatch = Pattern.compile(startRex);
 	private static String endRex = "</(.*)>";
 	private static Pattern endMatch = Pattern.compile(endRex);
@@ -39,10 +39,12 @@ public class XMLParser {
 				dom.addSubElement(newDom.getName(), newDom);
 				
 			}else if(tok.matches(singleRex)){
-				
+				parseAttributesIntoDom(dom, tok);
+			}else if(tok.matches(endRex)){
+				return dom;
 			}else{
 				// assume textual data.
-				System.out.println(tok);
+				dom.setdata(tok);
 			}
 		}
 		return dom;
@@ -70,7 +72,7 @@ public class XMLParser {
 				str.append((char)chr);
 			}
 			connection.disconnect();
-			parse(str.toString());
+			System.out.println(parse(str.toString()));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

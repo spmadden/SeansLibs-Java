@@ -14,7 +14,7 @@ import com.seanmadden.xmlconfiguration.XMLValueTypeNotFoundException;
  * @author spm2732
  *
  */
-public class XMLParser {
+public class XMLConfigurationParser {
 
 	private XMLTokenizer token = null;
 	private static String stElementRex = ".*<(.*)>.*";
@@ -23,7 +23,7 @@ public class XMLParser {
 	private static String eElementERex = ">.*";
 	private XMLConfiguration config = null;
 	
-	public XMLParser(String xml, XMLConfiguration config){
+	public XMLConfigurationParser(String xml, XMLConfiguration config){
 		token = new XMLTokenizer(xml);
 		this.config = config;
 	}
