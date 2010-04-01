@@ -51,9 +51,7 @@ public class XMLConfigurationParser {
 						matcher.find();
 					}
 					buf.append(element);
-					System.out.println(buf.toString());
 					XMLDataValue<?> data = valueParser.processXML(buf.toString());
-					System.out.println(data);
 					if(data != null)
 						config.addValue(data.getName(), data.getValue(), data.getDescription());
 				}

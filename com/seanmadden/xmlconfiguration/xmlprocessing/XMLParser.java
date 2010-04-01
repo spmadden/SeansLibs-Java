@@ -31,7 +31,6 @@ public class XMLParser {
 				match.find();
 				String name = match.group(1);
 				DOMElement newDom = new DOMElement(name);
-				System.out.println("SUB: " + name);
 				while((tok != null ) && !tok.matches(endRex)){
 					parse(newDom);
 					tok = token.nextToken();

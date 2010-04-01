@@ -54,6 +54,11 @@ public class XMLEditGui implements ActionListener {
 	 * A reference to the XML Configuration object we're editing.
 	 */
 	private XMLConfiguration config;
+	
+	/**
+	 * The list of callbacks to notify when the save button is clicked.
+	 */
+	private Vector<XMLGuiCompleteCallback> callbacks = new Vector<XMLGuiCompleteCallback>();
 
 	/**
 	 * This basic class is used simply to maintain state for two JComponenets,
@@ -88,7 +93,7 @@ public class XMLEditGui implements ActionListener {
 	 * edit this system.
 	 * 
 	 */
-	protected void displayGUI() {
+	public void displayGUI() {
 		for (Entry<String, XMLDataValue<Object>> ent : config.dataTable
 				.entrySet()) {
 			
@@ -200,10 +205,21 @@ public class XMLEditGui implements ActionListener {
 					}
 				}
 			}
-			System.out.println(config.generateXML());
+			for(XMLGuiCompleteCallback cb : callbacks){
+				cb.XMLSaveCalled();
+			}
 			panel.dispose();
 		} else if (cmd.equals("CancelClose")) {
 			panel.dispose();
 		}
+	}
+	
+	/**
+	* Appends a callback to the list of objects to be notified when the save button is clicked.
+	* 
+	* @param cb
+	*/
+	public void addCallback(XMLGuiCompleteCallback cb){
+		this.callbacks.add(cb);
 	}
 }

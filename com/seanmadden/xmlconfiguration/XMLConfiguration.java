@@ -52,6 +52,9 @@ public class XMLConfiguration {
 	 */
 	Hashtable<String, XMLEditCallback> callbacks = new Hashtable<String, XMLEditCallback>();
 
+	/**
+	 * The list of accepted values for this configuration.
+	 */
 	Vector<XMLDataValue<?>> valueTypes = new Vector<XMLDataValue<?>>();
 
 	/**
@@ -120,6 +123,11 @@ public class XMLConfiguration {
 
 	}
 
+	/**
+	* Add an accepted value type for this configuration
+	* 
+	* @param newValType
+	*/
 	public void addValueType(XMLDataValue<Object> newValType) {
 		valueTypes.add(newValType);
 	}
