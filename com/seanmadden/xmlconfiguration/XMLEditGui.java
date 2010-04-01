@@ -91,50 +91,33 @@ public class XMLEditGui implements ActionListener {
 	protected void displayGUI() {
 		for (Entry<String, XMLDataValue<Object>> ent : config.dataTable
 				.entrySet()) {
-			JTextField comp = new JTextField();
-			comp.setText(ent.getValue().getValue()+"");
-			comp.setActionCommand(ent.getKey());
-			JLabel label = new JLabel(ent.getValue().getDescription());
+			
+			JComponent comp = null;
+			String desc = ent.getValue().getDescription();
+			if(desc == null){
+				desc = ent.getKey();
+			}
+			JLabel label = new JLabel(desc);
+			String dataType = ent.getValue().acceptedDataType();
+			
+			if(dataType.equals("Boolean")){
+				comp = new JComboBox(new String[] { "Yes", "No" });
+				((JComboBox)comp).setActionCommand(ent.getKey());
+			}else if(dataType.equals("String") || dataType.equals("Integer")){
+				comp = new JTextField();
+				JTextField tf = (JTextField) comp;
+				tf.setText(ent.getValue().getValue()+"");
+				tf.setActionCommand(ent.getKey());
+			}
 
 			TableRow row = new TableRow();
 			row.label = label;
 			row.edit = comp;
 			row.name = ent.getKey();
 			row.type = ent.getValue().acceptedDataType();
-
+			
 			components.add(row);
 		}
-
-//		for (Entry<String, XMLDataValue<Integer>> ent : config.intsTable
-//				.entrySet()) {
-//			JTextField comp = new JTextField();
-//			comp.setText(ent.getValue().getValue().toString());
-//			comp.setActionCommand(ent.getKey());
-//			JLabel label = new JLabel(ent.getValue().getDescription());
-//
-//			TableRow row = new TableRow();
-//			row.edit = comp;
-//			row.label = label;
-//			row.name = ent.getKey();
-//			row.type = "Integer";
-//
-//			components.add(row);
-//		}
-//
-//		for (Entry<String, XMLDataValue<Boolean>> ent : config.boolsTable
-//				.entrySet()) {
-//			JComboBox comp = new JComboBox(new String[] { "Yes", "No" });
-//			comp.setActionCommand(ent.getKey());
-//			JLabel label = new JLabel(ent.getValue().getDescription());
-//
-//			TableRow row = new TableRow();
-//			row.edit = comp;
-//			row.label = label;
-//			row.name = ent.getKey();
-//			row.type = "Boolean";
-//
-//			components.add(row);
-//		}
 
 		panel.setLayout(new GridLayout(components.size() + 1, 2));
 		for (TableRow comp : components) {

@@ -139,7 +139,64 @@ public class XMLConfiguration {
 		}
 		return null;
 	}
+	
+	/**
+	* Returns a String that was previously loaded into the configuration.
+	* 
+	* @param name Name of the value
+	* @return String
+	*/
+	public String getString(String name){
+		XMLDataValue<Object> obj = dataTable.get(name);
+		if(obj == null){
+			return null;
+		}
+		if(obj.acceptedDataType().equals("String")){
+			return (String)obj.getValue();
+		}
+		return null;
+	}
+	
+	/**
+	* Returns a Boolean that was previously loaded into the configuration.
+	* 
+	* @param name
+	* @return
+	*/
+	public Boolean getBoolean(String name){
+		XMLDataValue<Object> obj = dataTable.get(name);
+		if(obj == null){
+			return null;
+		}
+		if(obj.acceptedDataType().equals("Boolean")){
+			return (Boolean)obj.getValue();
+		}
+		return null;
+	}
+	
+	/**
+	* Returns an integer that was previously loaded into the configuration.
+	* 
+	* @param name
+	* @return 
+	*/
+	public Integer getInteger(String name){
+		XMLDataValue<Object> obj = dataTable.get(name);
+		if(obj == null){
+			return null;
+		}
+		if(obj.acceptedDataType().equals("Integer")){
+			return (Integer)obj.getValue();
+		}
+		return null;
+	}
 
+	/**
+	* Finds a parser for the specified value
+	* 
+	* @param value
+	* @return
+	*/
 	public XMLDataValue<Object> findParser(String value) {
 		for (XMLDataValue<?> val : valueTypes) {
 			if (val.acceptedDataType().equals(value)) {
@@ -338,6 +395,9 @@ public class XMLConfiguration {
 			e.printStackTrace();
 		}
 		System.out.println(xml2.generateXML());
+		
+		XMLEditGui gui = new XMLEditGui(xml2);
+		gui.displayGUI();
 
 	}
 }
