@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Vector;
 
-
 /**
 * This class will iterate through the classpath and find all instances of classes that implement 'Report'
 *
@@ -73,7 +72,8 @@ public class ClassFinder {
                 if (f.isDirectory()) {
                         for (File fs : f.listFiles()) {
                                 paths.addAll(findClassFiles(path + '/'
-                                                + fs.getName(), startPath, toMatch));
+                                                + fs.getName(), startPath,
+                                                toMatch));
                         }
                         return paths;
                 } else {
@@ -86,12 +86,18 @@ public class ClassFinder {
                                 Class<?> c = Class.forName(cls);
                                 for (Class<?> cl : c.getInterfaces()) {
                                         if (cl.getName().equals(
-                                                       toMatch.getName())) {
-                                                System.out
-                                                                .println(paths);
+                                                        toMatch.getName())) {
                                                 paths.add(cls);
                                         }
                                 }
+                                c = c.getSuperclass();
+                                if (c != null) {
+                                        if (c.getName().equals(
+                                                        toMatch.getName())) {
+                                                paths.add(cls);
+                                        }
+                                }
+
                         } catch (IOException e) {
                                 e.printStackTrace();
                         } catch (ClassNotFoundException e) {
