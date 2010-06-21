@@ -50,7 +50,7 @@ public class ClassFinder {
         public static Vector<String> findAllInterfaces(Class<?> cls) {
                 Vector<String> vect = new Vector<String>();
                 String classpath = System.getProperty("java.class.path");
-                String[] paths = classpath.split(":");
+                String[] paths = classpath.split(System.getProperty("path.separator"));
                 for (String path : paths) {
                         vect.addAll(findClassFiles(path, path, cls));
                 }
@@ -67,11 +67,12 @@ public class ClassFinder {
         */
         private static Vector<String> findClassFiles(String path,
                         String startPath, Class<?> toMatch) {
+        		String sep = System.getProperty("file.separator");
                 Vector<String> paths = new Vector<String>();
                 File f = new File(path);
                 if (f.isDirectory()) {
                         for (File fs : f.listFiles()) {
-                                paths.addAll(findClassFiles(path + '/'
+                                paths.addAll(findClassFiles(path + sep
                                                 + fs.getName(), startPath,
                                                 toMatch));
                         }
@@ -79,10 +80,10 @@ public class ClassFinder {
                 } else {
                         if (!f.getAbsolutePath().endsWith(".class")) { return paths; }
                         try {
-                                String cls = f.getCanonicalPath().replace('/',
-                                                '.').substring(
-                                                startPath.length() + 1);
-                                cls = cls.replace(".class", "");
+                                String cls = f.getCanonicalPath().replaceAll(sep + sep,
+                                                ".").substring(
+                                                startPath.length() + sep.length());
+                                cls = cls.substring(0, cls.length()-6);
                                 Class<?> c = Class.forName(cls);
                                 for (Class<?> cl : c.getInterfaces()) {
                                         if (cl.getName().equals(
