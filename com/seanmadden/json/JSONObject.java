@@ -3,10 +3,6 @@
  */
 package com.seanmadden.json;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -14,45 +10,72 @@ import java.util.Map.Entry;
  * @author spm2732
  * 
  */
-public class JSONObject {
+public class JSONObject { 
 
-	private JSONTokenizer tok = null;
-	private JSONObjectType type = null;
+	/**
+	 * The Type of this object.
+	 */
+	private JSONObjectType type;
 
-	private Hashtable<String, JSONObject> subObjects = new Hashtable<String, JSONObject>();
-	private Hashtable<String, String> values = new Hashtable<String, String>();
-	private Vector<String> array = new Vector<String>();
+	/**
+	 * A String-Value mapping of the contained objects.
+	 */
+	private Map<String, JSONObject> subObjects = new Hashtable<String, JSONObject>();
+	/**
+	 * A string-string mapping of the values contained within.
+	 */
+	private Map<String, String> values = new Hashtable<String, String>();
+	
+	/**
+	 * A list of the inner values (if we're a string array)
+	 */
+	private List<JSONObject> array = new Vector<JSONObject>();
 
+	/**
+	 * Make me a JSONObject
+	 */
 	public JSONObject() {
 
 	}
 
-	private JSONObject(JSONObjectType type) {
-		this.type = type;
+	/**
+	 * Make me a JSONObject
+	 * @param t the type.
+	 */
+	protected JSONObject(JSONObjectType t) {
+		this.type = t;
 	}
 
-	public JSONObject(String jsonData) {
-		this(JSONObjectType.OBJECT);
-		tok = new JSONTokenizer(jsonData);
-		JSONObject object = parse(null);
-
-		this.values = object.values;
-		this.array = object.array;
-		this.type = object.type;
-		this.subObjects = object.subObjects;
-	}
-
+	/**
+	 * Make me a JSONObject
+	 * @param object copying this object.
+	 */
 	public JSONObject(JSONObject object) {
-		this.values = object.values;
-		this.array = object.array;
+		this.values = new Hashtable<String,String>(object.values);
+		this.array = new Vector<JSONObject>(object.array);
 		this.type = object.type;
-		this.subObjects = object.subObjects;
+		this.subObjects = new Hashtable<String, JSONObject>();
+		for(Entry<String, JSONObject>ent : object.subObjects.entrySet()){
+			subObjects.put(ent.getKey(), new JSONObject(ent.getValue()));
+		}
 	}
 
+	/**
+	 * Adds a subObject
+	 *
+	 * @param name the key of this sub object
+	 * @param obj the object.
+	 */
 	public void addSubObject(String name, JSONObject obj) {
 		subObjects.put(name, obj);
 	}
 
+	/**
+	 * Adds a string value to this object.
+	 *
+	 * @param name the key
+	 * @param value the value
+	 */
 	public void addValue(String name, String value) {
 		values.put(name, value);
 	}
@@ -78,57 +101,7 @@ public class JSONObject {
 		return in;
 	}
 
-	protected JSONObject parse(JSONObject in) {
-		String name = null;
-		while (tok.hasNext()) {
-			String item = tok.nextToken();
-			if (item.equals(":")) {
-				// yay nothing. absorb the token.
-			} else if (item.equals("{")) {
-				JSONObject newObj = parseSubObject();
-				if (name != null) {
-					in.addSubObject(name, newObj);
-					name = null;
-				} else
-					return newObj;
-			} else if (item.equals("[")) {
-				JSONObject newObj = parseArray();
-				in.addSubObject(name, newObj);
-				name = null;
-			} else if (item.equals(",")) {
-				// yay nothing. absorb the token
-			} else if (item.equals("}")) {
-				break;
-			} else {
-				if (name == null) {
-					name = item;
-				} else {
-					in.addValue(name, item);
-					name = null;
-				}
-			}
 
-		}
-		return in;
-	}
-
-	private JSONObject parseSubObject() {
-		JSONObject obj = new JSONObject(JSONObjectType.OBJECT);
-		return parse(obj);
-	}
-
-	private JSONObject parseArray() {
-		JSONObject obj = new JSONObject(JSONObjectType.ARRAY);
-		String token = null;
-		Vector<String> list = new Vector<String>();
-		while (!(token = tok.nextToken()).equals("]")) {
-			if (!token.equals(",")) {
-				list.add(token);
-			}
-		}
-		obj.array = list;
-		return obj;
-	}
 
 	public String toJSON() {
 		return toJSON(true);
@@ -185,21 +158,4 @@ public class JSONObject {
 
 	}
 
-	public static void main(String[] args) {
-		BufferedReader reader;
-		try {
-			reader = new BufferedReader(new FileReader("TestJson.json"));
-			String line = "", json = "";
-			while ((line = reader.readLine()) != null) {
-				json += line;
-			}
-
-			JSONObject jsonObj = new JSONObject(json);
-			System.out.println(jsonObj.toJSON(true));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }
