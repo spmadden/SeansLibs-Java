@@ -44,10 +44,40 @@ public class LineChartPanel extends JPanel {
 	private ChartSeries[] series;
 
 	/**
+	 * Internal options for this chart.
+	 */
+	private ChartOptions options;
+
+	/**
 	 * Make me a LineChartPanel
 	 */
 	public LineChartPanel() {
+		this(new ChartOptions());
+	}
+
+	/**
+	 * Make me a LineChartPanel
+	 * 
+	 * @param o
+	 *            Options
+	 */
+	public LineChartPanel(ChartOptions o) {
 		super();
+		options = o;
+	}
+
+	/**
+	 * Make me a LineChartPanel
+	 * 
+	 * @param s
+	 *            The series to include
+	 * @param o
+	 *            Any additional options.
+	 */
+	public LineChartPanel(ChartOptions o, ChartSeries... s) {
+		super();
+		series = s;
+		options = o;
 	}
 
 	/**
@@ -57,41 +87,16 @@ public class LineChartPanel extends JPanel {
 	 *            The series to include.
 	 */
 	public LineChartPanel(ChartSeries... s) {
-		super();
+		this(new ChartOptions(), s);
 	}
 
 	/**
-	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
-	 * @param g
-	 *            Graphics
-	 */
-	@Override
-	protected void paintComponent(Graphics g) {
-		
-		// Paint background.
-		g.setColor(Color.black);
-		g.fillRect(0, 0, getWidth(), getHeight());
-		
-		//Draw Axis
-		g.setColor(Color.yellow);
-		int percentOfWidth = (int) (getWidth() * .1);
-		int percentOfHeight = (int) (getHeight() * .1);
-		g.drawLine(percentOfWidth, percentOfHeight, percentOfWidth, getHeight()
-				- percentOfHeight);
-		g.drawLine(percentOfWidth, getHeight() - percentOfHeight, getWidth()
-				- percentOfWidth, getHeight()-percentOfHeight);
-		
-		
-	}
-
-	/**
-	 * Sets the series
+	 * Gets and returns options
 	 * 
-	 * @param s
-	 *            the series to set
+	 * @return the options
 	 */
-	public void setSeries(ChartSeries[] s) {
-		this.series = s;
+	public ChartOptions getOptions() {
+		return options;
 	}
 
 	/**
@@ -101,5 +106,48 @@ public class LineChartPanel extends JPanel {
 	 */
 	public ChartSeries[] getSeries() {
 		return series;
+	}
+
+	/**
+	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+	 * @param g
+	 *            Graphics
+	 */
+	@Override
+	protected void paintComponent(Graphics g) {
+
+		// Paint background.
+		g.setColor(Color.black);
+		g.fillRect(0, 0, getWidth(), getHeight());
+
+		// Draw Axis
+		g.setColor(Color.yellow);
+		int percentOfWidth = (int) (getWidth() * .1);
+		int percentOfHeight = (int) (getHeight() * .1);
+		g.drawLine(percentOfWidth, percentOfHeight, percentOfWidth, getHeight()
+				- percentOfHeight);
+		g.drawLine(percentOfWidth, getHeight() - percentOfHeight, getWidth()
+				- percentOfWidth, getHeight() - percentOfHeight);
+
+	}
+
+	/**
+	 * Sets the options
+	 * 
+	 * @param o
+	 *            the options to set
+	 */
+	public void setOptions(ChartOptions o) {
+		options = o;
+	}
+
+	/**
+	 * Sets the series
+	 * 
+	 * @param s
+	 *            the series to set
+	 */
+	public void setSeries(ChartSeries[] s) {
+		series = s;
 	}
 }
