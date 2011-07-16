@@ -8,5 +8,8 @@ package com.seanmadden.json;
  *
  */
 public enum JSONObjectType {
-	STRING, OBJECT, ARRAY
+	/**
+	 * The types
+	 */
+	STRING, OBJECT, ARRAY, NUMBER, BOOLEAN, NULL
 }
