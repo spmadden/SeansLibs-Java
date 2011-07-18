@@ -38,6 +38,12 @@ import com.seanmadden.charting.LineChartPanel;
 public final class LineChartTest {
 
 	/**
+	 * Make me a LineChartTest
+	 */
+	private LineChartTest() {
+	}
+
+	/**
 	 * YAY MAIN
 	 * 
 	 */
@@ -53,14 +59,25 @@ public final class LineChartTest {
 		frame.setVisible(true);
 
 		final DefaultChartSeries series = new DefaultChartSeries("Test Stream");
-		Thread thread = new Thread() {
+		pan.setSeries(series);
+		final Thread thread = new Thread() {
 			@Override
 			public void run() {
 				Random rnd = new Random();
-				while (true) {
-					series.addPoint(0, rnd.nextDouble() * rnd.nextInt(100));
+				boolean run = true;
+				int xpos = 0;
+				while (run) {
+					double val = rnd.nextDouble() * rnd.nextInt(100);
+					series.addPoint(xpos++, val);
+					System.out.println("Adding " + val);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						run = false;
+					}
 				}
 			}
+
 		};
 		thread.start();
 
@@ -73,7 +90,7 @@ public final class LineChartTest {
 
 			@Override
 			public void windowClosed(WindowEvent e) {
-
+				thread.interrupt();
 			}
 
 			@Override
@@ -102,11 +119,5 @@ public final class LineChartTest {
 			}
 		});
 
-	}
-
-	/**
-	 * Make me a LineChartTest
-	 */
-	private LineChartTest() {
 	}
 }

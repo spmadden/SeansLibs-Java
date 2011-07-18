@@ -23,6 +23,8 @@ package com.seanmadden.charting;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
@@ -31,7 +33,7 @@ import javax.swing.JPanel;
  * 
  * @author sean.madden
  */
-public class LineChartPanel extends JPanel {
+public class LineChartPanel extends JPanel implements SeriesChangedListener {
 
 	/**
 	 * Default gen'd
@@ -41,7 +43,7 @@ public class LineChartPanel extends JPanel {
 	/**
 	 * The list of series to display on this chart.
 	 */
-	private ChartSeries[] series;
+	private ChartSeries[] series = new ChartSeries[] {};
 
 	/**
 	 * Internal options for this chart.
@@ -91,6 +93,43 @@ public class LineChartPanel extends JPanel {
 	}
 
 	/**
+	 * Finds and returns the bounds of the series S
+	 * 
+	 * @param s
+	 *            The series to get bounds for.
+	 * @return The minimum and maximum X and Y values in the series.
+	 */
+	private static Rectangle2D.Double getBounds(ChartSeries s) {
+		Rectangle2D.Double ret = new Rectangle2D.Double(
+				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		for (Point2D.Double point : s.getValues()) {
+			if (point.x < ret.x) {
+				ret.x = point.x;
+			}
+			if (point.y < ret.y) {
+				ret.y = point.y;
+			}
+			if (point.x > ret.width) {
+				ret.width = point.x;
+			}
+			if (point.y > ret.height) {
+				ret.height = point.y;
+			}
+		}
+		return ret;
+	}
+
+	/**
+	 * @see com.seanmadden.charting.SeriesChangedListener#elementChanged()
+	 */
+	@Override
+	public void elementChanged() {
+		repaint();
+		System.out.println("changed called.");
+	}
+
+	/**
 	 * Gets and returns options
 	 * 
 	 * @return the options
@@ -114,8 +153,7 @@ public class LineChartPanel extends JPanel {
 	 *            Graphics
 	 */
 	@Override
-	protected void paintComponent(Graphics g) {
-
+	public void paint(Graphics g) {
 		// Paint background.
 		g.setColor(Color.black);
 		g.fillRect(0, 0, getWidth(), getHeight());
@@ -129,6 +167,28 @@ public class LineChartPanel extends JPanel {
 		g.drawLine(percentOfWidth, getHeight() - percentOfHeight, getWidth()
 				- percentOfWidth, getHeight() - percentOfHeight);
 
+		for (ChartSeries s : series) {
+			Point2D.Double[] points = s.getValues();
+			Rectangle2D.Double bounds = getBounds(s);
+			g.setColor(s.getColor());
+			double xRange = bounds.width - bounds.x;
+			double xScale = .8 * getWidth() / xRange;
+			double yRange = bounds.height - bounds.y;
+			double yScale = .8 * getHeight() / yRange;
+			double xShift = bounds.x * xScale + percentOfWidth;
+			double yShift = bounds.y * yScale;
+
+			for (int i = 1; i < points.length; i++) {
+				Point2D.Double prevPoint = points[i - 1];
+				Point2D.Double point = points[i];
+				g.drawLine((int) prevPoint.x, (int) prevPoint.y, (int) point.x,
+						(int) point.y);
+				g.drawLine((int) ((prevPoint.x + xShift) * xScale),
+						(int) ((prevPoint.y + yShift) * yScale),
+						(int) ((point.x + xShift) * xScale),
+						(int) ((point.y + yShift) * yScale));
+			}
+		}
 	}
 
 	/**
@@ -147,7 +207,11 @@ public class LineChartPanel extends JPanel {
 	 * @param s
 	 *            the series to set
 	 */
-	public void setSeries(ChartSeries[] s) {
+	public void setSeries(ChartSeries... s) {
 		series = s;
+		for (ChartSeries ser : s) {
+			((DefaultChartSeries) ser).addChangedListener(this);
+		}
 	}
+
 }

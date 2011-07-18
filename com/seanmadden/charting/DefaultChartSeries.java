@@ -21,7 +21,11 @@
  */
 package com.seanmadden.charting;
 
+import java.awt.Color;
 import java.awt.geom.Point2D.Double;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * @author sean.madden
@@ -37,7 +41,17 @@ public class DefaultChartSeries implements ChartSeries {
 	/**
 	 * The name!
 	 */
-	private final String name;
+	private String name;
+
+	/**
+	 * The listeners to notify upon changes.
+	 */
+	private final List<SeriesChangedListener> listeners = new Vector<SeriesChangedListener>();
+
+	/**
+	 * The color of this series - defaults to red.
+	 */
+	private Color color = Color.red;
 
 	/**
 	 * Make me a DefaultChartSeries
@@ -62,6 +76,16 @@ public class DefaultChartSeries implements ChartSeries {
 		System.arraycopy(values, 0, array, 0, values.length);
 		array[values.length] = new Double(x, y);
 		values = array;
+		triggerChange();
+	}
+
+	/**
+	 * @see com.seanmadden.charting.ChartSeries#getColor()
+	 * @return A color!
+	 */
+	@Override
+	public Color getColor() {
+		return color;
 	}
 
 	/**
@@ -81,4 +105,46 @@ public class DefaultChartSeries implements ChartSeries {
 	public Double[] getValues() {
 		return values;
 	}
+
+	/**
+	 * Sets the color
+	 * 
+	 * @param c
+	 *            the color to set
+	 */
+	public void setColor(Color c) {
+		color = c;
+	}
+
+	/**
+	 * Sets the name
+	 * 
+	 * @param n
+	 *            the name to set
+	 */
+	public void setName(String n) {
+		name = n;
+	}
+
+	/**
+	 * Adds a listener to receive events when this series is changed.
+	 * 
+	 * @param listen
+	 *            The element to notify.
+	 */
+	protected void addChangedListener(SeriesChangedListener... listen) {
+		listeners.addAll(Arrays.asList(listen));
+		triggerChange();
+	}
+
+	/**
+	 * Called to notify the listeners that a change happened.
+	 * 
+	 */
+	protected void triggerChange() {
+		for (SeriesChangedListener l : listeners) {
+			l.elementChanged();
+		}
+	}
+
 }

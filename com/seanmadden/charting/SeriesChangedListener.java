@@ -1,5 +1,5 @@
 /*
- * ChartSeries.java
+ * SeriesChangedListener.java
  * 
  * Copyright (C) 2011 Sean P Madden (sean.madden)
  * 
@@ -21,35 +21,15 @@
  */
 package com.seanmadden.charting;
 
-import java.awt.Color;
-import java.awt.geom.Point2D;
-
 /**
- * This interface represents a series of data points for display on a chart.
- * 
  * @author sean.madden
  * 
  */
-public interface ChartSeries {
+public interface SeriesChangedListener {
 
 	/**
-	 * Returns the specified color of this series.
+	 * Called when an element in the series is changed.
 	 * 
-	 * @return Color, the color to draw.
 	 */
-	public Color getColor();
-
-	/**
-	 * Returns the name of this series.
-	 * 
-	 * @return String name.
-	 */
-	public String getName();
-
-	/**
-	 * Returns the values in this series
-	 * 
-	 * @return Point2D.Double[] of points.
-	 */
-	public Point2D.Double[] getValues();
+	public void elementChanged();
 }
