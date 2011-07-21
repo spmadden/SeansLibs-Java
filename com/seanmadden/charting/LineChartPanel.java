@@ -51,6 +51,54 @@ public class LineChartPanel extends JPanel implements SeriesChangedListener {
 	private ChartOptions options;
 
 	/**
+	 * Total number of lower time spacers, set by TriggerResize()
+	 */
+	private int lNumSpacers = 10;
+
+	/**
+	 * Distance between the lower time spacers, set by TriggerResize()
+	 */
+	private int lSpacerDistance = 0;
+
+	/**
+	 * Textual label for the spacers based on the time range, set by
+	 * TriggerResize()
+	 */
+	private final int lSpaceDelta = 0;
+
+	/**
+	 * Integers representing the bottomY, upperY and bottomX of the spacer
+	 * lines, set by TriggerResize()
+	 */
+	private int lbY, luY, lbX;
+
+	/**
+	 * Total number of right value spacers, set by TriggerResize()
+	 */
+	private int rNumSpacers = 10;
+
+	/**
+	 * Distance between the right value spacers, set by TriggerResize()
+	 */
+	private int rSpacerDistance = 0;
+
+	/**
+	 * Textual label for the spacers based on value delta, set by
+	 * TriggerResize()
+	 */
+	private final int rSpaceDelta = 0;
+
+	/**
+	 * Ints representing the leftX, rightX and leftY of the value lines, set by
+	 * TriggerResize()
+	 */
+	private int rlX, rrX, rlY;
+	/**
+	 * Color of the horizontal graph guidelines
+	 */
+	private static Color guideLine = Color.gray;
+
+	/**
 	 * Make me a LineChartPanel
 	 */
 	public LineChartPanel() {
@@ -167,28 +215,40 @@ public class LineChartPanel extends JPanel implements SeriesChangedListener {
 		g.drawLine(percentOfWidth, getHeight() - percentOfHeight, getWidth()
 				- percentOfWidth, getHeight() - percentOfHeight);
 
-		for (ChartSeries s : series) {
-			Point2D.Double[] points = s.getValues();
-			Rectangle2D.Double bounds = getBounds(s);
-			g.setColor(s.getColor());
-			double xRange = bounds.width - bounds.x;
-			double xScale = .8 * getWidth() / xRange;
-			double yRange = bounds.height - bounds.y;
-			double yScale = .8 * getHeight() / yRange;
-			double xShift = bounds.x * xScale + percentOfWidth;
-			double yShift = bounds.y * yScale;
-
-			for (int i = 1; i < points.length; i++) {
-				Point2D.Double prevPoint = points[i - 1];
-				Point2D.Double point = points[i];
-				g.drawLine((int) prevPoint.x, (int) prevPoint.y, (int) point.x,
-						(int) point.y);
-				g.drawLine((int) ((prevPoint.x + xShift) * xScale),
-						(int) ((prevPoint.y + yShift) * yScale),
-						(int) ((point.x + xShift) * xScale),
-						(int) ((point.y + yShift) * yScale));
-			}
+		int lbx = lbX;
+		for (int i = lNumSpacers; i >= 0; i--) {
+			g.drawLine(lbx, luY, lbx, lbY);
+			g.drawString(lSpaceDelta * i + "", lbx - 4, lbY + 15);
+			lbx += lSpacerDistance;
 		}
+		int rly = rlY;
+		Color prev = g.getColor();
+		for (int i = 0; i <= rNumSpacers; i++) {
+			g.drawLine(rlX, rly, rrX, rly);
+			g.drawString(rSpaceDelta * i + "", rlX, rly);
+			if (i != 0) {
+				g.setColor(guideLine);
+				g.drawLine(rrX, rly, (int) (.9 * getWidth()), rly);
+				g.setColor(prev);
+			}
+			rly -= rSpacerDistance;
+		}
+
+		double ldY = getHeight() * .1;
+		double labelY = .5 * getHeight() - .5 * ldY * series.length;
+		double labelX = .9 * getWidth() + 10;
+		double ly = ldY;
+		for (ChartSeries l : series) {
+			g.setColor(l.getColor());
+			g.fillRect((int) labelX, (int) labelY + (int) ly, 5, 5);
+			g.setColor(l.getColor());
+			g.drawString(l.getName(), (int) labelX + 10, (int) labelY
+					+ (int) ly + 5);
+			ly += ldY;
+			drawLines(l, g);
+			g.setColor(prev);
+		}
+		g.dispose();
 	}
 
 	/**
@@ -211,6 +271,65 @@ public class LineChartPanel extends JPanel implements SeriesChangedListener {
 		series = s;
 		for (ChartSeries ser : s) {
 			((DefaultChartSeries) ser).addChangedListener(this);
+		}
+	}
+
+	/**
+	 * Method called to update information upon a resize
+	 * 
+	 * @see hospital.rmi.hospitalserver.graphs.Resizable#triggerResize()
+	 */
+	public synchronized void triggerResize() {
+
+		// find lower spacers
+		lSpacerDistance = (int) (getWidth() * .75) / lNumSpacers;
+		if (lSpacerDistance <= 30 && lNumSpacers > 1) {
+			lNumSpacers /= 2;
+			triggerResize();
+		} else if (lSpacerDistance >= 90) {
+			lNumSpacers *= 2;
+			triggerResize();
+		}
+		luY = (int) (getHeight() * .15);
+		lbY = luY + 15;
+		lbX = (int) (getHeight() * .1);
+
+		// find upper spacers
+		rSpacerDistance = (int) (getHeight() * .85) / rNumSpacers;
+		if (rSpacerDistance <= 25 && rNumSpacers > 1) {
+			rNumSpacers /= 2;
+			triggerResize();
+		} else if (rSpacerDistance >= 60) {
+			rNumSpacers *= 2;
+			triggerResize();
+		}
+
+		rlX = (int) (getWidth() * .05);
+		rrX = rlX + 15;
+		rlY = (int) (getHeight() * .85);
+
+	}
+
+	private void drawLines(ChartSeries s, Graphics g) {
+		Point2D.Double[] points = s.getValues();
+		Rectangle2D.Double bounds = getBounds(s);
+		g.setColor(s.getColor());
+		double xRange = bounds.width - bounds.x;
+		double xScale = .8 * getWidth() / xRange;
+		double yRange = bounds.height - bounds.y;
+		double yScale = -.8 * getHeight() / yRange;
+		double xShift = .1 * getWidth();
+		double yShift = .9 * getHeight();
+
+		for (int i = 1; i < points.length; i++) {
+			Point2D.Double prevPoint = points[i - 1];
+			Point2D.Double point = points[i];
+			int x1 = (int) (xScale * (prevPoint.x - bounds.x) + xShift);
+			int x2 = (int) (xScale * (point.x - bounds.x) + xShift);
+			int y1 = (int) (yScale * (prevPoint.y - bounds.y) + yShift);
+			int y2 = (int) (yScale * (point.y - bounds.y) + yShift);
+			g.drawLine(x1, y1, x2, y2);
+
 		}
 	}
 
