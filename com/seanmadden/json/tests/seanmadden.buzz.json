@@ -1,0 +1,60 @@
+{
+ "data": {
+  "kind": "buzz#person",
+  "id": "118173078730106212853",
+  "displayName": "Sean Madden",
+  "aboutMe": "<br>",
+  "profileUrl": "https://plus.google.com/118173078730106212853",
+  "thumbnailUrl": "https://lh5.googleusercontent.com/-94NSNDa2xQU/AAAAAAAAAAI/AAAAAAAAAAA/q_OlQncNS8g/photo.jpg",
+  "urls": [
+   {
+    "value": "http://picasaweb.google.com/spmadden"
+   },{
+    "value": "http://www.google.com/reader/shared/06946393315810202304"
+   },{
+    "value": "http://twitter.com/SeanPMadden"
+   },{
+    "value": "https://plus.google.com/118173078730106212853",
+    "type": "profile"
+   },{
+    "value": "https://www.googleapis.com/buzz/v1/people/118173078730106212853/@self?alt=json",
+    "type": "json"
+   }
+  ],
+  "photos": [
+   {
+    "value": "https://lh5.googleusercontent.com/-94NSNDa2xQU/AAAAAAAAAAI/AAAAAAAAAAA/q_OlQncNS8g/s24-c/photo.jpg",
+    "type": "thumbnail",
+    "width": 24,
+    "height": 24
+   },{
+    "value": "https://lh5.googleusercontent.com/-94NSNDa2xQU/AAAAAAAAAAI/AAAAAAAAAAA/q_OlQncNS8g/s50-c/photo.jpg",
+    "type": "thumbnail",
+    "width": 50,
+    "height": 50
+   }
+  ],
+  "organizations": [
+   {
+    "name": "Rochester Institute of Technology",
+    "title": "Software Engineering",
+    "type": "school"
+   },{
+    "name": "BAE Systems",
+    "title": "Eng, SW I",
+    "type": "work"
+   },{
+    "name": "RIT FAST/ITS",
+    "title": "Senior DSR",
+    "type": "work"
+   },{
+    "name": "FactSet Research Systems",
+    "title": "Security Assurance Engineer Intern",
+    "type": "work"
+   }
+  ],
+  "interests": [
+   "Climbing, 'Caching, Cycling, Coding"
+  ]
+ }
+}
