@@ -1,2 +1,13 @@
-/bin
 *.class
+.gradle*
+build/
+bin/
+reports/
+*.log
+
+*~
+
+# Package Files #
+*.jar
+*.war
+*.ear
